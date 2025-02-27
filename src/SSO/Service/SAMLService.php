@@ -79,17 +79,17 @@ class SAMLService {
             }
         }
 
-        if ($client->save()) {
-            // save changed roles rights of the menu
-            if (isset($_POST['sso_saml_roles'])) {
-                $accessRoles = array_map('intval', $_POST['sso_saml_roles']);
-            } else {
-                $accessRoles = array();
-            }
+        $client->save();
 
-            $rightMenuView = new RolesRights($this->db, 'sso_saml_access', $client->getValue('smc_id'));
-            $rightMenuView->saveRoles($accessRoles);
+        // save changed roles rights of the menu
+        if (isset($_POST['sso_saml_roles'])) {
+            $accessRoles = array_map('intval', $_POST['sso_saml_roles']);
+        } else {
+            $accessRoles = array();
         }
+
+        $accessRolesRights = new RolesRights($this->db, 'sso_saml_access', $clientId);
+        $accessRolesRights->saveRoles($accessRoles);
 
         $this->db->endTransaction();
     }

@@ -1334,8 +1334,8 @@
   <string name="SYS_SSO_LOAD_METADATA">Load Client Metadata</string>
   <string name="SYS_SSO_METADATA_URL">Metadata URL (optional)</string>
   <string name="SYS_SSO_METADATA_URL_DESC">Some clients offer a metadata file with all required settings. The automatic retrieval of this metadata URL only works if the URL is available to the admidio server.</string>
-  <string name="SYS_SSO_ROLES">Roles with Access</string>
-  <string name="SYS_SSO_ROLES_DESC">Only the selected roles are permitted to log in to the client through Single-sign-on. If empty, all valied Admidio users can log in.</string>
+  <string name="SYS_SSO_ROLES">Restrict Access to Roles</string>
+  <string name="SYS_SSO_ROLES_DESC">Only the selected roles are permitted to log in to the client through Single-sign-on. If empty, all valid Admidio users can log in.</string>
   <string name="SYS_SSO_NO_SAML_CLIENTS_FOUND">No SAML clients (Service Providers) configured!</string>
   <string name="SYS_SSO_NO_OIDC_CLIENTS_FOUND">No OIDC clients (Service Providers) configured!</string>
   <string name="SYS_SSO_OAUTH_KEYS">OIDC (SSO) keys</string>
