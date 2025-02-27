@@ -29,6 +29,7 @@ use Admidio\ProfileFields\Entity\ProfileField;
 use Admidio\Events\Entity\Room;
 use Admidio\Infrastructure\Entity\Text;
 use Admidio\Roles\Service\RolesService;
+use Admidio\SSO\Entity\SAMLClient;
 use Admidio\Users\Entity\User;
 use Admidio\Users\Entity\UserRegistration;
 use Admidio\Users\Entity\UserRelation;
@@ -70,6 +71,7 @@ class ChangelogService {
     public static array $noLogTables = [
         'auto_login', 'components', 'id', 'log_changes',
         'messages', 'messages_attachments', 'messages_content', 'messages_recipients',
+        'oauth_access_tokens', 'oauth_auth_codes', 'oauth_refresh_tokens', 
         'registrations',
         'sessions'];
 
@@ -192,6 +194,9 @@ class ChangelogService {
 
             'preferences' => 'SYS_SETTINGS',
             'texts' => 'SYS_SETTINGS',
+            'oauth_clients' => 'SYS_SSO_CLIENTS_OIDC', 
+            'oauth_jwks' => 'SYS_SSO_OAUTH_KEYS', 
+            'saml_clients' => 'SYS_SSO_CLIENTS_SAML',
             'others' => 'SYS_ALL_OTHERS',
         );
         $tableLabels = array_merge($tableLabels, self::$customCallbacks['getTableLabelArray']);
@@ -290,8 +295,12 @@ class ChangelogService {
                 return new UserRelationType($gDb);
             case 'forum_topic':
                 return new Topic($gDb);
-            case 'forum_post':
-                return new Post($gDb);
+            case 'saml_clients':
+                return new SAMLClient($gDb);
+            // case 'oidc_clients': // TODO_RK
+            //     return new OIDCClient($gDb);
+            // case 'oidc_jwks': // TODO_RK
+            //     return new TODO($gDb);
             default:
                 return null;
         }
@@ -560,6 +569,17 @@ class ChangelogService {
             'cat_system' =>                array('name' => 'SYS_SSYSTEM', 'type' => 'BOOL'),
             'cat_default' =>               array('name' => $gL10n->get('SYS_DEFAULT_VAR', array($gL10n->get('SYS_CATEGORY'))), 'type' => 'BOOL'),
             'cat_sequence' =>              'SYS_ORDER',
+
+            'smc_client_id' =>             'SYS_SSO_CLIENT_ID',
+            'smc_client_name' =>           'SYS_SSO_CLIENT_NAME',
+            'smc_metadata_url' =>          'SYS_SSO_METADATA_URL',
+            'smc_acs_url' =>               'SYS_SSO_ACS_URL',
+            'smc_slo_url' =>               'SYS_SSO_SLO_URL',
+            'smc_x509_certificate' =>      'SYS_SSO_X509_CERTIFICATE',
+
+            // TODO_RK
+            // 'oac_client_id' =>             'SYS_SSO_CLIENT_ID',
+
         );
         return array_merge($translations, self::$customCallbacks['getFieldTranslations']);
     }
@@ -668,6 +688,10 @@ class ChangelogService {
                     $url = SecurityUtils::encodeUrl(ADMIDIO_URL.FOLDER_MODULES.'/profile/profile.php', array('user_uuid' => $uuid)); break;
                 case 'user_relation_types':
                     $url = SecurityUtils::encodeUrl(ADMIDIO_URL.FOLDER_MODULES.'/userrelations/relationtypes_new.php', array('urt_uuid' => $uuid)); break;
+                case 'saml_clients':
+                    $url = SecurityUtils::encodeUrl(ADMIDIO_URL.FOLDER_PLUGINS.'/sso/clients.php', array('mode' => 'edit_saml', 'id' => $id)); break;
+                case 'oauth_clients':
+                    $url = SecurityUtils::encodeUrl(ADMIDIO_URL.FOLDER_PLUGINS.'/sso/clients.php', array('mode' => 'edit_oidc', 'id' => $id)); break;
             }
         }
         if ($url != '') {

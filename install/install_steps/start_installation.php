@@ -116,7 +116,10 @@ $sql = 'INSERT INTO '.TBL_ROLES_RIGHTS.'
              , (\'folder_upload\', \'adm_folders\')
              , (\'category_view\', \'adm_categories\')
              , (\'event_participation\', \'adm_events\')
-             , (\'menu_view\',     \'adm_menu\')';
+             , (\'menu_view\',     \'adm_menu\')
+             , (\'sso_saml_access\', \'adm_saml_clients\'),
+             , (\'sso_oidc_access\', \'adm_oidc_clients\'),
+             ';
 $db->queryPrepared($sql);
 
 // add edit categories right with reference to parent right

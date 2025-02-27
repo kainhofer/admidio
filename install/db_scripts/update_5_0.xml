@@ -202,5 +202,93 @@ WHERE usf_fn.usf_name_intern = 'FIRST_NAME' AND usf_ln.usf_name_intern = 'LAST_N
     <step id="950" database="pgsql">ALTER TABLE %PREFIX%_guestbook_comments DROP CONSTRAINT %PREFIX%_fk_gbc_usr_create</step>
     <step id="960" database="mysql">ALTER TABLE %PREFIX%_guestbook_comments DROP FOREIGN KEY %PREFIX%_fk_gbc_usr_change</step>
     <step id="970" database="pgsql">ALTER TABLE %PREFIX%_guestbook_comments DROP CONSTRAINT %PREFIX%_fk_gbc_usr_change</step>
+    <step id="980">CREATE TABLE IF NOT EXISTS %PREFIX%_oauth_clients (
+            ocl_id                      integer unsigned    NOT NULL    AUTO_INCREMENT,
+            ocl_name                    VARCHAR(255)        NOT NULL,
+            ocl_secret                  VARCHAR(255)        NOT NULL,
+            ocl_redirect_uri            TEXT                NOT NULL,
+            ocl_grant_types             VARCHAR(255)        NOT NULL,
+            ocl_scope                   VARCHAR(255)                     DEFAULT NULL,
+            ocl_created_at              TIMESTAMP           NOT NULL     DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (ocl_id)
+        )
+        ENGINE = InnoDB
+        DEFAULT character SET = utf8
+        COLLATE = utf8_unicode_ci;</step>
+    <step id="990">CREATE TABLE IF NOT EXISTS %PREFIX%_oauth_access_tokens (
+            oat_token_id                VARCHAR(100),
+            oat_usr_id                  integer unsigned    NOT NULL,
+            oat_ocl_id                  integer unsigned    NOT NULL,
+            oat_scopes                  TEXT,
+            oat_expires_at              TIMESTAMP           NOT NULL,
+            oat_revoked                 boolean,
+            PRIMARY KEY (oat_token_id)
+        )
+        ENGINE = InnoDB
+        DEFAULT character SET = utf8
+        COLLATE = utf8_unicode_ci;</step>
+    <step id="1000">CREATE TABLE IF NOT EXISTS %PREFIX%_oauth_refresh_tokens (
+            ort_refresh_token           VARCHAR(100),
+            ort_access_token_id         VARCHAR(100)        NOT NULL,
+            ort_expires_at              TIMESTAMP           NOT NULL,
+            PRIMARY KEY (ort_refresh_token)
+        )
+        ENGINE = InnoDB
+        DEFAULT character SET = utf8
+        COLLATE = utf8_unicode_ci;</step>
+    <step id="1010">CREATE TABLE IF NOT EXISTS %PREFIX%_oauth_auth_codes (
+            oac_auth_code               VARCHAR(100),
+            oac_usr_id                  integer unsigned    NOT NULL,
+            oac_ocl_id                  integer unsigned    NOT NULL,
+            oac_redirect_uri            TEXT                NOT NULL,
+            oac_expires_at              TIMESTAMP           NOT NULL,
+            oac_scopes                  TEXT,
+            PRIMARY KEY (oac_auth_code)
+        )
+        ENGINE = InnoDB
+        DEFAULT character SET = utf8
+        COLLATE = utf8_unicode_ci;</step>
+    <step id="1020">CREATE TABLE IF NOT EXISTS %PREFIX%_oauth_jwks (
+            ojw_key_id                   VARCHAR(100),
+            ojw_public_key               TEXT               NOT NULL,
+            ojw_private_key              TEXT               NOT NULL,
+            ojw_created_at               TIMESTAMP          NOT NULL    DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (ojw_key_id)
+        )
+        ENGINE = InnoDB
+        DEFAULT character SET = utf8
+        COLLATE = utf8_unicode_ci;</step>
+    <step id="1030">ALTER TABLE %PREFIX%_oauth_access_tokens
+        ADD CONSTRAINT %PREFIX%_fk_oat_usr_id      FOREIGN KEY (oat_usr_id)         REFERENCES %PREFIX%_users (usr_id)               ON DELETE CASCADE ON UPDATE CASCADE,
+        ADD CONSTRAINT %PREFIX%_fk_oat_ocl_id      FOREIGN KEY (oat_ocl_id)         REFERENCES %PREFIX%_oauth_clients (ocl_id)       ON DELETE CASCADE ON UPDATE CASCADE;</step>
+    <step id="1040">ALTER TABLE %PREFIX%_oauth_refresh_tokens 
+        ADD CONSTRAINT %PREFIX%_fk_ort_token_id    FOREIGN KEY (ort_access_token_id) REFERENCES %PREFIX%_oauth_access_tokens (oat_token_id) ON DELETE CASCADE ON UPDATE CASCADE;</step>
+    <step id="1050">ALTER TABLE %PREFIX%_oauth_auth_codes
+        ADD CONSTRAINT %PREFIX%_fk_oac_usr_id      FOREIGN KEY (oac_usr_id)         REFERENCES %PREFIX%_users (usr_id)               ON DELETE CASCADE,
+        ADD CONSTRAINT %PREFIX%_fk_oac_ocl_id      FOREIGN KEY (oac_ocl_id)         REFERENCES %PREFIX%_oauth_clients (ocl_id)       ON DELETE CASCADE;</step>
+    <step id="1060">CREATE TABLE %PREFIX%_saml_clients (
+            smc_id                      INT                 AUTO_INCREMENT,
+            smc_client_id               VARCHAR(255)        NOT NULL UNIQUE,
+            smc_client_name             VARCHAR(255)        NOT NULL,
+            smc_metadata_url            TEXT                NULL,
+            smc_acs_url                 TEXT                NOT NULL,
+            smc_slo_url                 TEXT                NULL,
+            smc_x509_certificate        TEXT                NOT NULL,
+
+            smc_usr_id_create           integer unsigned,
+            smc_timestamp_create        timestamp           NOT NULL    DEFAULT CURRENT_TIMESTAMP,
+            smc_usr_id_change           integer unsigned,
+            smc_timestamp_change        timestamp           NULL        DEFAULT NULL,
+            PRIMARY KEY (smc_id)
+        )
+        ENGINE = InnoDB
+        DEFAULT character SET = utf8
+        COLLATE = utf8_unicode_ci;</step>
+    <step id="1070">ALTER TABLE %PREFIX%_saml_clients
+            ADD CONSTRAINT %PREFIX%_fk_smc_usr_create FOREIGN KEY (smc_usr_id_create)   REFERENCES %PREFIX%_users (usr_id)               ON DELETE SET NULL ON UPDATE RESTRICT,
+            ADD CONSTRAINT %PREFIX%_fk_smc_usr_change FOREIGN KEY (smc_usr_id_change)   REFERENCES %PREFIX%_users (usr_id)               ON DELETE SET NULL ON UPDATE RESTRICT;</step>
+    <step id="1080">INSERT INTO %PREFIX%_roles_rights (ror_name_intern, ror_table)
+                   VALUES ('sso_saml_access', 'adm_saml_clients'), ('sso_oidc_access', 'adm_oidc_clients')</step>
+
     <step>stop</step>
 </update>

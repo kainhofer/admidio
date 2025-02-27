@@ -1,0 +1,173 @@
+<?php
+namespace Admidio\SSO\Entity;
+
+use Admidio\Infrastructure\Database;
+use Admidio\Infrastructure\Exception;
+use Admidio\Infrastructure\Entity\Entity;
+use Admidio\Roles\Entity\RolesRights;
+
+
+class SAMLClient extends Entity 
+{
+    /**
+     * @var RolesRights|null Object with all roles that could view the current folder
+     */
+    protected ?RolesRights $rolesAccess;
+
+    public function __construct(Database $database, $client_id = null) {
+        if (is_numeric($client_id)) {
+            parent::__construct($database, TBL_SAML_CLIENTS, 'smc', $client_id);
+        } else {
+            parent::__construct($database, TBL_SAML_CLIENTS, 'smc');
+            if (!empty($client_id)) {
+                $this->readDataByColumns([$this->columnPrefix . '_client_id']);
+            }
+        }
+    }
+
+    /**
+     * Deletes the selected record of the table and all references in other tables.
+     * @return bool **true** if no error occurred
+     * @throws Exception
+     */
+    public function delete(): bool
+    {
+        // delete all roles assignments that have the right to login to this client
+        if (!empty($this->rolesAccess)) {
+            $this->rolesAccess->delete();
+        }
+        return parent::delete();
+    }
+
+   /**
+     * Add all roles of the array to the current SAML client. 
+     * @param array<int,int> $rolesArray Array with all role IDs that should be added.
+     * @throws Exception
+     */
+    public function addRolesOnClient(array $rolesArray)
+    {
+        $this->editRolesOnClient('add', $rolesArray);
+    }
+    /**
+     * Remove all roles of the array from the current SAML client. 
+     * @param string $rolesRightNameIntern Name of the right where the roles should be removed
+     *                                     e.g. **folder_view** or **folder_upload**
+     * @param array<int,int> $rolesArray Array with all role IDs that should be removed.
+     * @param bool $recursive If set to **true** than the rights will be set recursive to all subfolders.
+     * @throws Exception
+     */
+    public function removeRolesOnFolder(array $rolesArray)
+    {
+        $this->editRolesOnClient('remove', $rolesArray);
+    }
+    /**
+     * Add all roles of the array to the permitted login roles. 
+     * @param string $mode "mode" could be "add" or "remove"
+     * @param string $rolesRightNameIntern Name of the right where the roles should be added
+     * @param array<int,int> $rolesArray
+     * @param int $folderId The folder id of the subfolder if this method is called recursive
+     * @throws Exception
+     */
+    private function editRolesOnClient(string $mode, array $rolesArray)
+    {
+        if (count($rolesArray) === 0) {
+            return;
+        }
+        if (empty($this->rolesAccess)) {
+            return;
+        }
+
+        if ($mode === 'add') {
+            $this->rolesAccess->addRoles($rolesArray);
+        } else {
+            $this->rolesAccess->removeRoles($rolesArray);
+        }
+    }
+
+    /**
+     * Returns an array with all role IDs that have access rights to log in to the SAML client.
+     * @return array<int,int> Returns an array with all role ids that have login rights to the SAML client.
+     */
+    public function getAccessRolesIds(): array
+    {
+        if (!empty($this->rolesAccess)) {
+            return $this->rolesAccess->getRolesIds();
+        } else {
+            return array();
+        }
+    }
+
+    /**
+     * Returns an array with all role names that have access rights to log in to the SAML client.
+     * @return array<int,int> Returns an array with all role names that have login rights to the SAML client.
+     */
+    public function getAccessRolesNames(): array
+    {
+        if (empty($this->rolesAccess)) {
+            return array();
+        } else {
+            return $this->rolesAccess->getRolesNames();
+        }
+    }
+
+    /**
+     * Checks if the current user has access rights to the SAML client.
+     * @return bool Return **true** if the user has access rights to the SAML client
+     * @throws Exception
+     */
+   public function hasAccessRight(): bool
+    {
+        global $gCurrentUser;
+        if (empty($this->rolesAccess)) {
+            return false;
+        } else {
+            return $this->rolesAccess->hasRight($gCurrentUser->getRoleMemberships()) || $gCurrentUser->administrateDocumentsFiles();
+        }
+    }
+
+    /**
+     * Reads a record out of the table in database selected by the conditions of the param **$sqlWhereCondition** out of the table.
+     * If the sql find more than one record the method returns **false**.
+     * Per default all columns of the default table will be read and stored in the object.
+     * @param string $sqlWhereCondition Conditions for the table to select one record
+     * @param array<int,mixed> $queryParams The query params for the prepared statement
+     * @return bool Returns **true** if one record is found
+     * @throws Exception
+     * @see Entity#readDataByUuid
+     * @see Entity#readDataByColumns
+     * @see Entity#readDataById
+     */
+    protected function readData(string $sqlWhereCondition, array $queryParams = array()): bool
+    {
+        if (parent::readData($sqlWhereCondition, $queryParams)) {
+            $clientId = (int)$this->getValue('smc_id');
+            $this->rolesAccess = new RolesRights($this->db, 'sso_saml_access', $clientId);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Return a human-readable representation of this client.
+     * 
+     * @return string The readable representation of the record (can also be a translatable identifier)
+     */
+    public function readableName(): string
+    {
+        return $this->dbColumns[$this->columnPrefix . '_client_name']??'';
+    }
+
+
+
+    /**
+     * Retrieve the list of database fields that are ignored for the changelog.
+     * In addition to the default ignored columns, don't log fot_views
+     *
+     * @return true Returns the list of database columns to be ignored for logging.
+     */
+    public function getIgnoredLogColumns(): array
+    {
+        return array_merge(parent::getIgnoredLogColumns(),
+        ($this->newRecord)?[$this->columnPrefix.'_client_name']:[]);
+    }
+}

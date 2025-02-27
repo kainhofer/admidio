@@ -1310,6 +1310,38 @@
   <string name="SYS_SOCIAL_NETWORKS">Social networks</string>
   <string name="SYS_SOCIAL_NETWORK_FIELD_DESC">Here you can enter your username that you use in this social network. Other members will then be able to find you in this network.</string>
   <string name="SYS_SOCIAL_NETWORK_FIELD_URL_DESC">Would you like to set a link to your #VAR1# profile? Your #VAR1# login name is required. Log in to your #VAR1# account and go to your profile. Now copy the URL in this field and save your profile here. Visitors of your profile are now able to open your #VAR1# profile directly.</string>
+
+  <string name="SYS_SSO_CLIENTS_SAML">SAML 2.0 clients</string>
+  <string name="SYS_SSO_CLIENT_SAML">SAML 2.0 client</string>
+  <string name="SYS_SSO_CLIENTS_OIDC">OpenID Connect (OIDC) clients</string>
+  <string name="SYS_SSO_CLIENT_OIDC">OIDC client</string>
+  <string name="SYS_SSO_CLIENT_ADD_OIDC">New OIDC client</string>
+  <string name="SYS_SSO_CLIENT_DELETE">Delete SSO client</string>
+  <string name="SYS_SSO_CLIENT_ADD_SAML">New SAML 2.0 client</string>
+  <string name="SYS_SSO_CLIENT_ADMIN">Single-Sign-On Client Administration (SAML 2.0, OIDC)</string>
+  <string name="SYS_SSO_CLIENT_ADMIN_DESC">Admidio can be used as an "id Provider" for single-sign-on using the SAML 2.0 or OIDC protocols. This means that other web applications ("clients") can user Admidio's user accounts for authentification and authorization. Each client needs to be registered here, and the client needs to be set up for SSO with admidio, too.<br/>When a user wants to log into a client application, instead of the client's login screen, they are redirected to Admidio. If th user is already logged into Admidio, the logged-in user is returned to the client and given access. Otherwise the user can login to Admidio and is then redirected back to the client application.</string>
+  <string name="SYS_SSO_CLIENT_NAME">Client Name</string>
+  <string name="SYS_SSO_CLIENT_NAME_DESC">The human-readable name of the client. This is a purely descriptive attribute and will not be used to identify clients.</string>
+  <string name="SYS_SSO_CLIENT_ID">Client ID</string>
+  <string name="SYS_SSO_CLIENT_ID_DESC">The unique identifier of the client, typically provided by the client. Typically, this is either a unique URL or a reandomly generated string provided by the client. It is important that the value here matches exactly the value used in the client's configuration, otherwise the client will not work.</string>
+  <string name="SYS_SSO_EDIT_SAML_CLIENT">Edit SAML Client (Service Provider)</string>
+  <string name="SYS_SSO_EDIT_OIDC_CLIENT">Edit OIDC Client (Service Provider)</string>
+  <string name="SYS_SSO_ADD_SAML_CLIENT">Add SAML Client (Service Provider)</string>
+  <string name="SYS_SSO_ADD_OIDC_CLIENT">Add OIDC Client (Service Provider)</string>
+  <string name="SYS_SSO_ACS_URL">ACS URL</string>
+  <string name="SYS_SSO_ACS_URL_DESC">The Assertion Consumer Servicer (ACS) URL is the client's main entry point. After successful login at Admidio, the user will be redirected to that URL and logged in at the client.</string>
+  <string name="SYS_SSO_AUTO_SETUP">Automatic setup from client metadata</string>
+  <string name="SYS_SSO_LOAD_METADATA">Load Client Metadata</string>
+  <string name="SYS_SSO_METADATA_URL">Metadata URL (optional)</string>
+  <string name="SYS_SSO_METADATA_URL_DESC">Some clients offer a metadata file with all required settings. The automatic retrieval of this metadata URL only works if the URL is available to the admidio server.</string>
+  <string name="SYS_SSO_ROLES">Roles with Access</string>
+  <string name="SYS_SSO_ROLES_DESC">Only the selected roles are permitted to log in to the client through Single-sign-on. If empty, all valied Admidio users can log in.</string>
+  <string name="SYS_SSO_NO_SAML_CLIENTS_FOUND">No SAML clients (Service Providers) configured!</string>
+  <string name="SYS_SSO_NO_OIDC_CLIENTS_FOUND">No OIDC clients (Service Providers) configured!</string>
+  <string name="SYS_SSO_OAUTH_KEYS">OIDC (SSO) keys</string>
+  <string name="SYS_SSO_X509_CERTIFICATE">x509 Client Certificate</string>
+  <string name="SYS_SSO_X509_CERTIFICATE_DESC">SAML Messages are cryptographically signed to prevent security attacks. This certificate is provided by the client and must be entered / copied exactly as given by the client. Otherwise the SAML communication will fail and SSO login will not be possible.</string>
+
   <string name="SYS_START" description="Start of a date">Start</string>
   <string name="SYS_STATUS_CODE_INVALID">Invalid status code!</string>
   <string name="SYS_STILL_X_CHARACTERS">still #VAR1# characters</string>
