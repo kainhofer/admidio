@@ -17,6 +17,7 @@
             {include 'sys-template-parts/form.input.tpl' data=$elements['smc_client_name']}
             {include 'sys-template-parts/form.input.tpl' data=$elements['smc_client_id']}
             {include 'sys-template-parts/form.input.tpl' data=$elements['smc_acs_url']}
+            {include 'sys-template-parts/form.input.tpl' data=$elements['smc_slo_url']}
             {include 'sys-template-parts/form.multiline.tpl' data=$elements['smc_x509_certificate']}
             {include 'sys-template-parts/form.select.tpl' data=$elements['sso_saml_roles']}
         </div>

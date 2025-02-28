@@ -1330,6 +1330,8 @@
   <string name="SYS_SSO_ADD_OIDC_CLIENT">Add OIDC Client (Service Provider)</string>
   <string name="SYS_SSO_ACS_URL">ACS URL</string>
   <string name="SYS_SSO_ACS_URL_DESC">The Assertion Consumer Servicer (ACS) URL is the client's main entry point. After successful login at Admidio, the user will be redirected to that URL and logged in at the client.</string>
+  <string name="SYS_SSO_SLO_URL">Single Log-Out URL (optional)</string>
+  <string name="SYS_SSO_SLO_URL_DESC">The SLO URL is the client's end point to inform the client about a user logout from Admidio. For security reasons, all client application with an SLO URL will be informed about the log out and shall log out the user from the client app, too. Not all SAML client apps provide a single-log-out URL.</string>
   <string name="SYS_SSO_AUTO_SETUP">Automatic setup from client metadata</string>
   <string name="SYS_SSO_LOAD_METADATA">Load Client Metadata</string>
   <string name="SYS_SSO_METADATA_URL">Metadata URL (optional)</string>

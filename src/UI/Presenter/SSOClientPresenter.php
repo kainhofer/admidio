@@ -122,6 +122,12 @@ class SSOClientPresenter extends PagePresenter
             $client->getValue('smc_acs_url'),
             array('type' => 'url', 'maxLength' => 2000, 'property' => FormPresenter::FIELD_REQUIRED, 'helpTextId' => $gL10n->get('SYS_SSO_ACS_URL_DESC'))
         );
+        $form->addInput(
+            'smc_slo_url',
+            $gL10n->get(textId: 'SYS_SSO_SLO_URL'),
+            $client->getValue('smc_slo_url'),
+            array('type' => 'url', 'maxLength' => 2000, 'helpTextId' => $gL10n->get('SYS_SSO_SLO_URL_DESC'))
+        );
         $form->addMultilineTextInput(
             'smc_x509_certificate',
             $gL10n->get('SYS_SSO_X509_CERTIFICATE'),
@@ -158,48 +164,69 @@ class SSOClientPresenter extends PagePresenter
         const metadataUrl = $("#smc_metadata_url").val().trim();
         if (!metadataUrl) { alert("Please enter a metadata URL."); return;}
 
-        // Use a CORS proxy script in admidio\'s source tree, as loading the metadata from a different server via JS triggers CORS errors in many cases!
-        const currentDir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf(\'/\'));
-        const proxyUrl = `${window.location.origin}${currentDir}/fetch_metadata.php?url=${encodeURIComponent(metadataUrl)}`;
-
-
-        $.get(proxyUrl)
+        // First try to load the metadata directly from the client. If we run into CORS error (loading from a different server 
+        // than the one hosting Admidio is often not permitted), we use the admidio server\'s CORS proxy script.
+        $.get(metadataUrl)
             .done(function (metadataXml) {
-                let xmlDoc;
-                // If response is already an XML Document, use it directly
-                if (metadataXml instanceof Document) {
-                    xmlDoc = metadataXml;
-                } else if (typeof metadataXml === "string") {
-                    // If response is a string, attempt to parse it as XML
-                    xmlDoc = $.parseXML(metadataXml);
-                } else {
-                    alert("Unexpected response format.");
-                    return;
-                }
-                const $xml = $(xmlDoc);
-                
-                // Use native JavaScript methods to handle XML namespaces
-                const entityDescriptor = xmlDoc.querySelector("EntityDescriptor");
-                const entityId = entityDescriptor ? entityDescriptor.getAttribute("entityID") : "";
-
-                // Extract Assertion Consumer Service (ACS) URL
-                const acsElement = xmlDoc.querySelector("AssertionConsumerService");
-                const acsUrl = acsElement ? acsElement.getAttribute("Location") : "";
-
-                // Extract X.509 Certificate
-                const x509Element = xmlDoc.querySelector("KeyDescriptor[use=\'signing\'] X509Certificate");
-                const x509Cert = x509Element ? x509Element.textContent.trim() : "";
-
-                // Populate input fields
-                $("#smc_client_id").val(entityId);
-                $("#smc_acs_url").val(acsUrl);
-                $("#smc_x509_certificate").val(formatCertificate(x509Cert));
+                handleClientMetadataXML(metadataXml);
             })
             .fail(function () {
-                alert("Error loading metadata. Please check the URL and try again.");
+                // Loading directly from the client failed, try using the CORS proxy script in admidio\'s source tree
+                const currentDir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf(\'/\'));
+                const proxyUrl = `${window.location.origin}${currentDir}/fetch_metadata.php?url=${encodeURIComponent(metadataUrl)}`;
+                $.get(proxyUrl)
+                    .done(function (metadataXml) {
+                        handleClientMetadataXML(metadataXml);
+                    })
+                    .fail(function () {
+                        alert("Error loading metadata. Please check the URL and try again.");
+                    });
             });
     });
 
+    function handleClientMetadataXML(metadataXml) {
+        let xmlDoc;
+        // If response is already an XML Document, use it directly
+        if (metadataXml instanceof Document) {
+            xmlDoc = metadataXml;
+        } else if (typeof metadataXml === "string") {
+            // If response is a string, attempt to parse it as XML
+            xmlDoc = $.parseXML(metadataXml);
+        } else {
+            alert("Unexpected response format.");
+            return false;
+        }
+        const $xml = $(xmlDoc);
+
+        // Use native JavaScript methods to handle XML namespaces
+        const entityDescriptor = xmlDoc.querySelector("EntityDescriptor");
+        const entityId = entityDescriptor ? entityDescriptor.getAttribute("entityID") : ""
+
+        // Extract Assertion Consumer Service (ACS) URL
+        const acsElement = xmlDoc.querySelector("AssertionConsumerService");
+        const acsUrl = acsElement ? acsElement.getAttribute("Location") : ""
+
+        const sloElement = xmlDoc.querySelector("SingleLogoutService");
+        const sloUrl = sloElement ? sloElement.getAttribute("Location") : ""
+        
+        // Extract X.509 Certificate
+        const x509Element = xmlDoc.querySelector("KeyDescriptor[use=\'signing\'] X509Certificate");
+        const x509Cert = x509Element ? x509Element.textContent.trim() : ""
+        
+        // Populate input fields
+        if (entityId !="") {
+            $("#smc_client_id").val(entityId);
+        }
+        if (acsUrl !="") {
+            $("#smc_acs_url").val(acsUrl);
+        }
+        if (sloUrl !="") {
+            $("#smc_slo_url").val(sloUrl);
+        }
+        if (x509Cert !="") {
+            $("#smc_x509_certificate").val(formatCertificate(x509Cert));
+        }
+    }
     // Helper function to format X.509 certificate with proper line breaks
     function formatCertificate(cert) {
         if (!cert) return "";
