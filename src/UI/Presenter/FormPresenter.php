@@ -241,7 +241,9 @@ class FormPresenter
             $attributes['value'] = $optionsAll['btn-value'];
         }
         $attributes['data-admidio'] = $optionsAll['data-admidio'];
-
+        if (array_key_exists('style', $optionsAll)) {
+            $attributes['style'] = $optionsAll['style'];
+        }
         // disable field
         if ($optionsAll['property'] === self::FIELD_DISABLED) {
             $attributes['disabled'] = 'disabled';
