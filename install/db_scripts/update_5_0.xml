@@ -268,15 +268,18 @@ WHERE usf_fn.usf_name_intern = 'FIRST_NAME' AND usf_ln.usf_name_intern = 'LAST_N
         ADD CONSTRAINT %PREFIX%_fk_oac_ocl_id      FOREIGN KEY (oac_ocl_id)         REFERENCES %PREFIX%_oauth_clients (ocl_id)       ON DELETE CASCADE;</step>
     <step id="1060">CREATE TABLE %PREFIX%_saml_clients (
             smc_id                      INT                 AUTO_INCREMENT,
+            smc_uuid                    varchar(36)         NOT NULL,
+            smc_org_id                  integer unsigned    NOT NULL,
             smc_client_id               VARCHAR(255)        NOT NULL UNIQUE,
             smc_client_name             VARCHAR(255)        NOT NULL,
             smc_metadata_url            TEXT                NULL,
             smc_acs_url                 TEXT                NOT NULL,
             smc_slo_url                 TEXT                NULL,
             smc_x509_certificate        TEXT                NOT NULL,
-            smc_userid_field            varchar(50)         NOT NULL    default "usr_id",
+            -- smc_allowed_roles           TEXT                NULL, -- role-based access is modelled via role rights
+            smc_userid_field            varchar(50)         NOT NULL    default 'usr_id',
             smc_user_fields             text                NULL,
-
+        
             smc_usr_id_create           integer unsigned,
             smc_timestamp_create        timestamp           NOT NULL    DEFAULT CURRENT_TIMESTAMP,
             smc_usr_id_change           integer unsigned,
@@ -296,12 +299,11 @@ WHERE usf_fn.usf_name_intern = 'FIRST_NAME' AND usf_ln.usf_name_intern = 'LAST_N
             key_uuid                    varchar(36)         NOT NULL,
             key_org_id                  integer unsigned    NOT NULL,
             key_name                    text                NOT NULL,
-            key_type                    enum('saml_signing', 'saml_encryption', 'oidc_signing', 'oidc_encryption') NOT NULL,
             key_algorithm               varchar(50)         NOT NULL    DEFAULT 'RSA',
             key_private                 text                NOT NULL,
             key_public                  text                NOT NULL,
             key_certificate             text                NULL,
-            key_expires_at              timestamp           NULL,
+            key_expires_at              date                NULL,
             key_is_active               boolean             NOT NULL    DEFAULT true,
             key_usr_id_create           integer unsigned,
             key_timestamp_create        timestamp           NOT NULL    DEFAULT CURRENT_TIMESTAMP,
