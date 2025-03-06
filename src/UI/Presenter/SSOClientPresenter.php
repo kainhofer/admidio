@@ -29,19 +29,13 @@ use Admidio\Roles\Entity\RolesRights;
 class SSOClientPresenter extends PagePresenter
 {
     /**
-     * @var int id of the SAML or OIDC client.
-     */
-    protected int $clientId = 0;
-
-    /**
      * Constructor creates the page object and initialized all parameters.
      * @param string $clientId Id of the SAML or OIDC client.
      * @throws Exception
      */
-    public function __construct(int $clientId = 0)
+    public function __construct(string $objectUUID = '')
     {
-        $this->clientId = $clientId;
-        parent::__construct('');
+        parent::__construct($objectUUID);
     }
 
     /**
@@ -50,11 +44,11 @@ class SSOClientPresenter extends PagePresenter
      */
     public function createSAMLEditForm(): void
     {
-        global $gDb, $gL10n, $gCurrentSession;
+        global $gDb, $gL10n, $gCurrentSession, $gProfileFields;
 
         // create SAML client object
         $client = new SAMLClient($gDb);
-        if ($this->clientId > 0) {
+        if ($this->objectUUID !== '') {
             $this->setHeadline($gL10n->get('SYS_EDIT_VAR', array($gL10n->get('SYS_SSO_CLIENT_SAML'))));
         } else {
             $this->setHeadline($gL10n->get('SYS_CREATE_VAR', array($gL10n->get('SYS_SSO_CLIENT_SAML'))));
@@ -62,8 +56,8 @@ class SSOClientPresenter extends PagePresenter
         $this->setHtmlID('admidio-saml-client-edit');
         
         $roleAccessSet = array();
-        if ($this->clientId > 0) {
-            $client->readDataById($this->clientId);
+        if ($this->objectUUID !== '') {
+            $client->readDataByUUID($this->objectUUID);
         }
 
         // Access restrictions by role/group are handled through role rights
@@ -88,13 +82,13 @@ class SSOClientPresenter extends PagePresenter
             );
         }
 
-        ChangelogService::displayHistoryButton($this, 'saml-client', 'saml_clients', !empty($this->clientId), array('id' => $this->clientId));
+        ChangelogService::displayHistoryButton($this, 'saml-client', 'saml_clients', !empty($this->objectUUID), array('uuid' => $this->objectUUID));
 
         // show form
         $form = new FormPresenter(
             'adm_saml_client_edit_form',
             'modules/saml_client.edit.tpl',
-            SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_PLUGINS . '/sso/clients.php', array('id' => $this->clientId, 'mode' => 'save_saml')),
+            SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_PLUGINS . '/sso/clients.php', array('uuid' => $this->objectUUID, 'mode' => 'save_saml')),
             $this
         );
 
@@ -136,19 +130,60 @@ class SSOClientPresenter extends PagePresenter
             array('maxLength' => 6000, 'helpTextId' => $gL10n->get('SYS_SSO_X509_CERTIFICATE_DESC'))
         );
 
+        $useridFields = [
+            ['usr_id', $gL10n->get('SYS_SSO_USERID_ID') . ' - usr_id', 'SYS_SSO_USERID_FIELDS'], 
+            ['usr_uuid',  $gL10n->get('SYS_SSO_USERID_UUID') . ' - usr_uuid', 'SYS_SSO_USERID_FIELDS'], 
+            ['usr_login_name', $gL10n->get('SYS_SSO_USERID_LOGIN') . ' - usr_login_name', 'SYS_SSO_USERID_FIELDS'], 
+        ];
+        $form->addSelectBox(
+            'smc_userid_field',
+            $gL10n->get('SYS_SSO_USERID_FIELD'),
+            $useridFields,
+            array(
+                'property' => FormPresenter::FIELD_REQUIRED,
+                'defaultValue' => $client->getValue('smc_userid_field'),
+                'multiselect' => false,
+                'helpTextId' => 'SYS_SSO_USERID_FIELD_DESC'
+                )
+            );
+
+
+        $userFields = $useridFields;
+        foreach ($gProfileFields->getProfileFields() as $field) {
+            if ($field->getValue('usf_hidden') == 0) {
+                $fieldId = $field->getValue('usf_name_intern');
+                $fieldValue = addslashes($field->getValue('usf_name')) . ' - ' . strtolower($fieldId);
+                $fieldCat = $field->getValue('cat_name');
+                $userFields[] =  [$fieldId, $fieldValue, $fieldCat];
+            }
+        }
+        $userFields[] = ['roles', $gL10n->get('SYS_ROLES') . ' - roles', 'SYS_ROLES'];
 
         $form->addSelectBox(
-            'sso_saml_roles',
-            $gL10n->get('SYS_SSO_ROLES'),
-            $allRolesSet,
+            'sso_saml_fields',
+            $gL10n->get('SYS_SSO_SAML_ATTRIBUTES'),
+            $userFields,
             array(
                 'property' => FormPresenter::FIELD_DEFAULT,
-                'defaultValue' => $client->getAccessRolesIds(),
+                'defaultValue' => $client->getUserFields(),
                 'multiselect' => true,
-                'helpTextId' => 'SYS_SSO_ROLES_DESC'
-            )
-        );
-
+                'helpTextId' => 'SYS_SSO_SAML_ATTRIBUTES_DESC'
+                )
+            );
+            
+            $form->addSelectBox(
+                'sso_saml_roles',
+                $gL10n->get('SYS_SSO_ROLES'),
+                $allRolesSet,
+                array(
+                    'property' => FormPresenter::FIELD_DEFAULT,
+                    'defaultValue' => $client->getAccessRolesIds(),
+                    'multiselect' => true,
+                    'helpTextId' => 'SYS_SSO_ROLES_DESC'
+                )
+            );
+    
+        
         $form->addSubmitButton(
             'adm_button_save', 
             $gL10n->get('SYS_SAVE'), 
@@ -260,7 +295,7 @@ class SSOClientPresenter extends PagePresenter
         $this->addPageFunctionsMenuItem(
             'menu_item_sso_preferences',
             $gL10n->get('SYS_SETTINGS'),
-            ADMIDIO_URL . FOLDER_MODULES . '/preferences.php',
+            ADMIDIO_URL . FOLDER_MODULES . '/preferences.php?panel=sso',
             'bi-gear-fill'
         );
 
@@ -311,8 +346,9 @@ class SSOClientPresenter extends PagePresenter
     
         $SAMLService = new SAMLService($gDb, $gCurrentUser);
         $templateClientNodes = array();
-        foreach ($SAMLService->getIds() as $clientId) {
-            $client = new SAMLClient($gDb, $clientId);
+        foreach ($SAMLService->getUUIDs() as $clientUUID) {
+            $client = new SAMLClient($gDb);
+            $client->readDataByUuid($clientUUID);
             $templateClient = array();
             $templateClient[] = $client->getValue('smc_client_name');
             $templateClient[] = $client->getValue('smc_client_id');
@@ -322,18 +358,18 @@ class SSOClientPresenter extends PagePresenter
 
             $actions = '';
             // add link to edit SAML client
-            $actions .= '<a class="admidio-icon-link" href="' . SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_PLUGINS . '/sso/clients.php', array('mode' => 'edit_saml', 'id' => $clientId)) . '">' .
+            $actions .= '<a class="admidio-icon-link" href="' . SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_PLUGINS . '/sso/clients.php', array('mode' => 'edit_saml', 'uuid' => $clientUUID)) . '">' .
                     '<i class="bi bi-pencil-square" data-bs-toggle="tooltip" title="' . $gL10n->get('SYS_SSO_EDIT_SAML_CLIENT') . '"></i></a>';
             
             // add link to delete SAML client
             $actions .= '<a class="admidio-icon-link admidio-messagebox" href="javascript:void(0);" data-buttons="yes-no"
                     data-message="' . $gL10n->get('SYS_DELETE_ENTRY', array($client->readableName())) . '"
-                    data-href="callUrlHideElement(\'adm_saml_client_' . $clientId . '\', \'' . SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_PLUGINS . '/sso/clients.php', array('mode' => 'delete_saml', 'id' => $clientId)) . '\', \'' . $gCurrentSession->getCsrfToken() . '\')">
+                    data-href="callUrlHideElement(\'adm_saml_client_' . $clientUUID . '\', \'' . SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_PLUGINS . '/sso/clients.php', array('mode' => 'delete_saml', 'uuid' => $clientUUID)) . '\', \'' . $gCurrentSession->getCsrfToken() . '\')">
                     <i class="bi bi-trash" data-bs-toggle="tooltip" title="' . $gL10n->get('SYS_SSO_CLIENT_DELETE') . '"></i>
                 </a>';
             $templateClient[] = $actions;
 
-            $table->addRowByArray($templateClient, 'adm_saml_client_' . $clientId, array('nobr' => 'true'));
+            $table->addRowByArray($templateClient, 'adm_saml_client_' . $clientUUID, array('nobr' => 'true'));
         }
     
         // add table to the form

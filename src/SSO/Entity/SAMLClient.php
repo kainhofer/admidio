@@ -111,6 +111,29 @@ class SAMLClient extends Entity
     }
 
     /**
+     * Returns an array with all selected user fields (internal names) to be submitted to the client / Service Provider upon successful login.
+     * @return array<int,int> Returns an array with all selected user field names that are sent to the SAML client.
+     */
+    public function getUserFields(): array
+    {
+        $fields = $this->getValue('smc_user_fields');
+        if (empty($fields)) {
+            return array();
+        } else {
+            return explode(',', $fields);
+        }
+    }
+
+    /**
+     * Sets the selected user fields to be sent to SAML clients upon login
+     */
+    public function setUserFields($fields)
+    {
+        $fields = array_map('strval', $fields);
+        $this->setValue('smc_user_fields', implode(',', $fields));
+    }
+
+    /**
      * Checks if the current user has access rights to the SAML client.
      * @return bool Return **true** if the user has access rights to the SAML client
      * @throws Exception
@@ -145,6 +168,11 @@ class SAMLClient extends Entity
             return true;
         }
         return false;
+    }
+
+    public function readDatabyEntityId(string $entityId): bool
+    {
+        return $this->readDataByColumns([$this->columnPrefix . '_client_id' => $entityId]);
     }
 
     /**

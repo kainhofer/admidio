@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS %PREFIX%_guestbook            CASCADE;
 DROP TABLE IF EXISTS %PREFIX%_forum_topics         CASCADE;
 DROP TABLE IF EXISTS %PREFIX%_forum_posts          CASCADE;
 DROP TABLE IF EXISTS %PREFIX%_links                CASCADE;
+DROP TABLE IF EXISTS %PREFIX%_keys                 CASCADE;
 DROP TABLE IF EXISTS %PREFIX%_members              CASCADE;
 DROP TABLE IF EXISTS %PREFIX%_messages             CASCADE;
 DROP TABLE IF EXISTS %PREFIX%_messages_attachments CASCADE;
@@ -577,6 +578,8 @@ COLLATE = utf8_unicode_ci;
 
 CREATE TABLE %PREFIX%_saml_clients (
     smc_id                      INT                 AUTO_INCREMENT,
+    smc_uuid                    varchar(36)         NOT NULL,
+    smc_org_id                  integer unsigned    NOT NULL,
     smc_client_id               VARCHAR(255)        NOT NULL UNIQUE,
     smc_client_name             VARCHAR(255)        NOT NULL,
     smc_metadata_url            TEXT                NULL,
@@ -584,6 +587,8 @@ CREATE TABLE %PREFIX%_saml_clients (
     smc_slo_url                 TEXT                NULL,
     smc_x509_certificate        TEXT                NOT NULL,
     -- smc_allowed_roles           TEXT                NULL, -- role-based access is modelled via role rights
+    smc_userid_field            varchar(50)         NOT NULL    default "usr_id",
+    smc_user_fields             text                NULL,
 
     smc_usr_id_create           integer unsigned,
     smc_timestamp_create        timestamp           NOT NULL    DEFAULT CURRENT_TIMESTAMP,
@@ -595,6 +600,27 @@ ENGINE = InnoDB
 DEFAULT character SET = utf8
 COLLATE = utf8_unicode_ci;
 
+
+/*==============================================================*/
+/* Table: adm_sso_keys                                               */
+/*==============================================================*/
+CREATE TABLE %PREFIX%_sso_keys (
+    key_id                      integer unsigned    NOT NULL    AUTO_INCREMENT,
+    key_uuid                    varchar(36)         NOT NULL,
+    key_org_id                  integer unsigned    NOT NULL,
+    key_name                    text                NOT NULL,
+    key_algorithm               varchar(50)         NOT NULL    DEFAULT 'RSA',
+    key_private                 text                NOT NULL,
+    key_public                  text                NOT NULL,
+    key_certificate             text                NULL,
+    key_expires_at              date                NULL,
+    key_is_active               boolean             NOT NULL    DEFAULT true,
+    key_usr_id_create           integer unsigned,
+    key_timestamp_create        timestamp           NOT NULL    DEFAULT CURRENT_TIMESTAMP,
+    key_usr_id_change           integer unsigned,
+    key_timestamp_change        timestamp           NULL        DEFAULT NULL,
+    PRIMARY KEY (key_id)
+);
 
 /*==============================================================*/
 /* Table: adm_organizations                                     */
@@ -1159,6 +1185,11 @@ ALTER TABLE %PREFIX%_rooms
 ALTER TABLE %PREFIX%_saml_clients
     ADD CONSTRAINT %PREFIX%_fk_smc_usr_create FOREIGN KEY (smc_usr_id_create)   REFERENCES %PREFIX%_users (usr_id)               ON DELETE SET NULL ON UPDATE RESTRICT,
     ADD CONSTRAINT %PREFIX%_fk_smc_usr_change FOREIGN KEY (smc_usr_id_change)   REFERENCES %PREFIX%_users (usr_id)               ON DELETE SET NULL ON UPDATE RESTRICT;
+
+ALTER TABLE %PREFIX%_sso_keys
+    ADD CONSTRAINT %PREFIX%_fk_key_org         FOREIGN KEY (key_org_id)         REFERENCES %PREFIX%_organizations (org_id)       ON DELETE RESTRICT ON UPDATE RESTRICT,
+    ADD CONSTRAINT %PREFIX%_fk_urt_usr_change  FOREIGN KEY (key_usr_id_change)  REFERENCES %PREFIX%_users (usr_id)               ON DELETE SET NULL ON UPDATE RESTRICT,
+    ADD CONSTRAINT %PREFIX%_fk_urt_usr_create  FOREIGN KEY (key_usr_id_create)  REFERENCES %PREFIX%_users (usr_id)               ON DELETE SET NULL ON UPDATE RESTRICT;
 
 ALTER TABLE %PREFIX%_sessions
     ADD CONSTRAINT %PREFIX%_fk_ses_org         FOREIGN KEY (ses_org_id)         REFERENCES %PREFIX%_organizations (org_id)       ON DELETE RESTRICT ON UPDATE RESTRICT,

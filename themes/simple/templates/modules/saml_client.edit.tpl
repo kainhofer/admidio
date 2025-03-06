@@ -19,6 +19,13 @@
             {include 'sys-template-parts/form.input.tpl' data=$elements['smc_acs_url']}
             {include 'sys-template-parts/form.input.tpl' data=$elements['smc_slo_url']}
             {include 'sys-template-parts/form.multiline.tpl' data=$elements['smc_x509_certificate']}
+        </div>
+    </div>
+    <div class="card admidio-field-group">
+        <div class="card-header">{$l10n->get('SYS_NAME')} &amp; {$l10n->get('SYS_SSO_USERDATA_ACCESS')}</div>
+        <div class="card-body">
+            {include 'sys-template-parts/form.select.tpl' data=$elements['smc_userid_field']}
+            {include 'sys-template-parts/form.select.tpl' data=$elements['sso_saml_fields']}
             {include 'sys-template-parts/form.select.tpl' data=$elements['sso_saml_roles']}
         </div>
     </div>

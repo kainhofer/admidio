@@ -195,9 +195,23 @@ $defaultOrgPreferences = array(
     'profile_photo_storage'     => '0',
 
     // Single-sign-on (SAML, OIDC)
-    'sso_pretty_urls'           => '1',
-    'sso_saml_enabled'          => '0',
-    'sso_oidc_enabled'          => '0',
+    'sso_saml_enabled'              => '0',
+    'sso_saml_entity_id'            => ADMIDIO_URL,
+    'sso_saml_supported_protocols'  => 'urn:oasis:names:tc:SAML:2.0:protocol',
+//    'sso_saml_clock_skew_tolerance' => '',
+//    'sso_saml_sign_assertions'      => '1',
+//    'sso_saml_sign_responses'       => '1',
+//    'sso_saml_encrypt_assertions'   => '0',
+    'sso_saml_signing_key'          => '0',
+    'sso_saml_encryption_key'       => '0',
+ //   'sso_saml_allowed_algorithms'   => '0',
+ //   'sso_saml_session_timeout'      => '',
+ //   'sso_saml_user_id_attribute'    => '',
+ //   'sso_saml_attributes'           => '',
+
+    'sso_oidc_enabled'              => '0',
+    'sso_oidc_signing_key'          => '0',
+    'sso_oidc_encryption_key'       => '0',
 
     // Weblinks
     'enable_weblinks_module'    => '1',

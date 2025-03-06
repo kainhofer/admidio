@@ -11,67 +11,86 @@
  */
 use Admidio\Infrastructure\Exception;
 use Admidio\Infrastructure\Utils\SecurityUtils;
-use Admidio\SSO\Entity\SAMLClient;
-use Admidio\SSO\Service\SAMLService;
-use Admidio\SSO\Entity\OIDCClient;
-use Admidio\SSO\Service\OIDCService;
-use Admidio\UI\Presenter\SSOClientPresenter;
+use Admidio\SSO\Entity\Key;
+use Admidio\SSO\Service\KeyService;
+use Admidio\UI\Presenter\SSOKeyPresenter;
 
 require_once(__DIR__ . '/../../adm_program/system/common.php');
-$getMode = admFuncVariableIsValid($_GET, 'mode', 'string', array('defaultValue' => 'list', 'validValues' => array('list', 'edit_saml', 'save_saml', 'delete_saml', 'edit_oidc', 'save_oidc', 'delete_oidc', 'sequence')));
+$validModes = array('list', 'edit', 'save', 'delete', 'import', 'export', 'export_password', 'certificate', 'regenerate');
+$getMode = admFuncVariableIsValid($_GET, 'mode', 'string', array('defaultValue' => 'list', 'validValues' => $validModes));
 
 try {
     
-    // Only administrators are allowed to manage SSO clients (both SAML 2.0 and OIDC)
+    // Only administrators are allowed to manage SSO keys (both SAML 2.0 and OIDC)
     if (!$gCurrentUser->isAdministrator()) {
         throw new Exception('SYS_NO_RIGHTS');
     }
 
     // Initialize and check the parameters
-    $getClientUUID = admFuncVariableIsValid($_GET, 'uuid', 'uuid');
-
+    $getKeyUUID = admFuncVariableIsValid($_GET, 'uuid', 'uuid');
 
     switch ($getMode) {
         case 'list':
             // create html page object
-            $page = new SSOClientPresenter();
+            $page = new SSOKeyPresenter();
             $page->createList();
             $gNavigation->addStartUrl(CURRENT_URL, $page->getHeadline(), 'bi-key');
             $page->setContentFullWidth();
             $page->show();
             break;
 
-        case 'edit_saml':
+        case 'edit':
             // create html page object
-            $page = new SSOClientPresenter($getClientUUID);
-            $page->createSAMLEditForm();
+            $page = new SSOKeyPresenter($getKeyUUID);
+            $page->createEditForm();
             $gNavigation->addUrl(CURRENT_URL, $page->getHeadline());
             $page->show();
             break;
 
-        case 'save_saml':
-            $samlService = new SAMLService($gDb, $gCurrentUser);
-            $samlService->save($getClientUUID);
+        case 'save':
+            $keyService = new KeyService($gDb);
+            $keyService->save($getKeyUUID);
 
             $gNavigation->deleteLastUrl();
             echo json_encode(array('status' => 'success', 'url' => $gNavigation->getUrl()));
             break;
 
-        case 'delete_saml':
-            // delete menu entry
+        case 'delete':
+            // delete cryptographic key
 
             // check the CSRF token of the form against the session token
             SecurityUtils::validateCsrfToken($_POST['adm_csrf_token']);
 
-            $client = new SAMLClient($gDb);
-            $client->readDataById($getClientId);
-            $client->delete();
+            $key = new Key($gDb);
+            $key->readDataByUuid($getKeyUUID);
+            $key->delete();
             echo json_encode(array('status' => 'success'));
             break;
 
+        case 'import':
+            // TODO_RK
+
+            break;
+            
+        case 'export_password':
+            $page = new SSOKeyPresenter($getKeyUUID);
+            $page->createExportPasswordForm();
+            // $page->show();
+            break;
+
+        case 'export':
+            // SecurityUtils::validateCsrfToken($_POST['adm_csrf_token']);
+            $keyService = new KeyService($gDb);
+            $keyService->exportToPkcs12($getKeyUUID);
+            break;
+
+        case 'certificate':
+            $keyService = new KeyService($gDb);
+            $keyService->exportCertificate($getKeyUUID);
+            break;
     }
 } catch (Throwable $e) {
-    if (in_array($getMode, array('save', 'delete', 'save_saml', 'delete_saml', 'save_oidc', 'delete_oidc'))) {
+    if (in_array($getMode, array('save', 'delete'))) {
         echo json_encode(array('status' => 'error', 'message' => $e->getMessage()));
     } else {
         $gMessage->show($e->getMessage());

@@ -29,6 +29,7 @@ use Admidio\ProfileFields\Entity\ProfileField;
 use Admidio\Events\Entity\Room;
 use Admidio\Infrastructure\Entity\Text;
 use Admidio\Roles\Service\RolesService;
+use Admidio\SSO\Entity\Key;
 use Admidio\SSO\Entity\SAMLClient;
 use Admidio\Users\Entity\User;
 use Admidio\Users\Entity\UserRegistration;
@@ -197,6 +198,7 @@ class ChangelogService {
             'oauth_clients' => 'SYS_SSO_CLIENTS_OIDC', 
             'oauth_jwks' => 'SYS_SSO_OAUTH_KEYS', 
             'saml_clients' => 'SYS_SSO_CLIENTS_SAML',
+            'sso_keys' => 'SYS_SSO_KEYS',
             'others' => 'SYS_ALL_OTHERS',
         );
         $tableLabels = array_merge($tableLabels, self::$customCallbacks['getTableLabelArray']);
@@ -299,6 +301,8 @@ class ChangelogService {
                 return new Topic($gDb);
             case 'saml_clients':
                 return new SAMLClient($gDb);
+            case 'ssos_keys':
+                return new Key($gDb);
             // case 'oidc_clients': // TODO_RK
             //     return new OIDCClient($gDb);
             // case 'oidc_jwks': // TODO_RK
@@ -572,12 +576,22 @@ class ChangelogService {
             'cat_default' =>               array('name' => $gL10n->get('SYS_DEFAULT_VAR', array($gL10n->get('SYS_CATEGORY'))), 'type' => 'BOOL'),
             'cat_sequence' =>              'SYS_ORDER',
 
-            'smc_client_id' =>             'SYS_SSO_CLIENT_ID',
-            'smc_client_name' =>           'SYS_SSO_CLIENT_NAME',
-            'smc_metadata_url' =>          'SYS_SSO_METADATA_URL',
-            'smc_acs_url' =>               'SYS_SSO_ACS_URL',
-            'smc_slo_url' =>               'SYS_SSO_SLO_URL',
-            'smc_x509_certificate' =>      'SYS_SSO_X509_CERTIFICATE',
+            'smc_client_id' =>              'SYS_SSO_CLIENT_ID',
+            'smc_client_name' =>            'SYS_SSO_CLIENT_NAME',
+            'smc_metadata_url' =>           'SYS_SSO_METADATA_URL',
+            'smc_acs_url' =>                'SYS_SSO_ACS_URL',
+            'smc_slo_url' =>                'SYS_SSO_SLO_URL',
+            'smc_x509_certificate' =>       'SYS_SSO_X509_CERTIFICATE',
+
+            'key_org_id' =>                 array('name' => 'SYS_ORGANIZATION', 'type' => 'ORG'),
+            'key_name' =>                   'SYS_NAME',
+            'key_algorithm' =>              'SYS_SSO_KEY_ALGORITHM',
+            'key_private' =>                'SYS_SSO_KEY_PRIVATE',
+            'key_public' =>                 'SYS_SSO_KEY_PUBLIC',
+            'key_certificate' =>            'SYS_SSO_KEY_CERTIFICATE',
+            'key_expires_at' =>             array('name' => 'SYS_SSO_KEY_EXPIRES', 'type' => 'DATETIME'),
+            'key_is_active' =>              array('name' => 'SYS_SSO_KEY_ACTIVE', 'type' => 'BOOL'),
+
 
             // TODO_RK
             // 'oac_client_id' =>             'SYS_SSO_CLIENT_ID',
@@ -691,9 +705,11 @@ class ChangelogService {
                 case 'user_relation_types':
                     $url = SecurityUtils::encodeUrl(ADMIDIO_URL.FOLDER_MODULES.'/userrelations/relationtypes_new.php', array('urt_uuid' => $uuid)); break;
                 case 'saml_clients':
-                    $url = SecurityUtils::encodeUrl(ADMIDIO_URL.FOLDER_PLUGINS.'/sso/clients.php', array('mode' => 'edit_saml', 'id' => $id)); break;
+                    $url = SecurityUtils::encodeUrl(ADMIDIO_URL.FOLDER_PLUGINS.'/sso/clients.php', array('mode' => 'edit_saml', 'uuid' => $uuid)); break;
                 case 'oauth_clients':
-                    $url = SecurityUtils::encodeUrl(ADMIDIO_URL.FOLDER_PLUGINS.'/sso/clients.php', array('mode' => 'edit_oidc', 'id' => $id)); break;
+                    $url = SecurityUtils::encodeUrl(ADMIDIO_URL.FOLDER_PLUGINS.'/sso/clients.php', array('mode' => 'edit_oidc', 'uuid' => $uuid)); break;
+                case 'sso_keys':
+                    $url = SecurityUtils::encodeUrl(ADMIDIO_URL.FOLDER_PLUGINS.'/sso/keys.php', array('mode' => 'edit', 'uuid' => $uuid)); break;
             }
         }
         if ($url != '') {
