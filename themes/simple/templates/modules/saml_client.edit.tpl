@@ -12,7 +12,7 @@
         </div>
     </div>
     <div class="card admidio-field-group">
-        <div class="card-header">{$l10n->get('SYS_NAME')} &amp; {$l10n->get('SYS_PROPERTIES')}</div>
+        <div class="card-header">{$l10n->get('SYS_SSO_NAME_PROPERTIES')}</div>
         <div class="card-body">
             {include 'sys-template-parts/form.input.tpl' data=$elements['smc_client_name']}
             {include 'sys-template-parts/form.input.tpl' data=$elements['smc_client_id']}
@@ -22,11 +22,94 @@
         </div>
     </div>
     <div class="card admidio-field-group">
-        <div class="card-header">{$l10n->get('SYS_NAME')} &amp; {$l10n->get('SYS_SSO_USERDATA_ACCESS')}</div>
+        <div class="card-header">{$l10n->get('SYS_SSO_USERDATA_ACCESS')}</div>
         <div class="card-body">
             {include 'sys-template-parts/form.select.tpl' data=$elements['smc_userid_field']}
-            {include 'sys-template-parts/form.select.tpl' data=$elements['sso_saml_fields']}
-            {include 'sys-template-parts/form.select.tpl' data=$elements['sso_saml_roles']}
+
+            <div class="admidio-form-group admidio-form-custom-content row mb-3">
+                <label class="col-sm-3 col-form-label">
+                    {$l10n->get('SYS_SSO_SAML_ATTRIBUTES')}
+                </label>
+                <div class="col-sm-9">
+                    <div class="table-responsive">
+                        <table class="table table-condensed" id="saml_fields_table">
+                            <thead>
+                            <tr class="nosort">
+                                <th style="width: 50%;">{$l10n->get('SYS_PROFILE_FIELD')}</th>
+                                <th style="width: 40%;">{$l10n->get('SYS_SSO_SAML_ATTRIBUTE')}</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody id="saml_fields_tbody"></tbody>
+                            <tfoot>
+                            <tr id="table_row_button nosort">
+                                <td colspan="3">
+                                    <input id="{$elements['saml_fields_all_other'].id}" name="{$elements['saml_fields_all_other'].id}" class="form-check-input focus-ring " type="checkbox" value="1" 
+                                    {foreach $elements['saml_fields_all_other'].attributes as $itemvar}
+                                        {$itemvar@key}="{$itemvar}"
+                                    {/foreach} >
+                                    <label class="form-check-label fw-normal" for="saml_fields_all_other"> {$l10n->get('SYS_SSO_SAML_ATTRIBUTES_ALLOTHER')}</label>
+                                </td>
+                            </tr>
+                            <tr id="table_row_button nosort">
+                                <td colspan="3">
+                                    <a class="icon-text-link" href="javascript:addColumn_saml_fields()"><i class="bi bi-plus-circle-fill"></i> {$l10n->get('SYS_ADD_FIELD')}</a>
+                                    <!--a class="icon-text-link" href="javascript:addAll_saml_fields()"><i class="bi bi-plus-circle-fill"></i> {$l10n->get('SYS_ADD_ALL_FIELDS')}</a-->
+                                </td>
+                            </tr>
+                            <tr id="table_row_button nosort">
+                                <td colspan="3">
+                                    <div class="form-text">{$l10n->get('SYS_SSO_SAML_ATTRIBUTES_DESC')}</div>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="admidio-form-group admidio-form-custom-content row mb-3">
+                <label class="col-sm-3 col-form-label">
+                    {$l10n->get('SYS_SSO_SAML_ROLES')}
+                </label>
+                <div class="col-sm-9">
+                    <div class="table-responsive">
+                        <table class="table table-condensed" id="saml_roles_table">
+                            <thead>
+                            <tr class="nosort">
+                                <th style="width: 50%;">{$l10n->get('SYS_ROLE')}</th>
+                                <th style="width: 40%;">{$l10n->get('SYS_SSO_SAML_ROLE')}</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody id="saml_roles_tbody"></tbody>
+                            <tfoot>
+                            <tr id="table_row_button nosort">
+                                <td colspan="3">
+                                    <input id="{$elements['saml_roles_all_other'].id}" name="{$elements['saml_roles_all_other'].id}" class="form-check-input focus-ring " type="checkbox" value="1" 
+                                    {foreach $elements['saml_roles_all_other'].attributes as $itemvar}
+                                        {$itemvar@key}="{$itemvar}"
+                                    {/foreach} >
+                                    <label class="form-check-label fw-normal" for="saml_roles_all_other"> {$l10n->get('SYS_SSO_SAML_ROLES_ALLOTHER')}</label>
+                                </td>
+                            </tr>
+                            <tr id="table_row_button nosort">
+                                <td colspan="3">
+                                    <a class="icon-text-link" href="javascript:addColumn_saml_roles()"><i class="bi bi-plus-circle-fill"></i> {$l10n->get('SYS_ADD_ROLE')}</a>
+                                    <!--a class="icon-text-link" href="javascript:addAll_saml_roles()"><i class="bi bi-plus-circle-fill"></i> {$l10n->get('SYS_ADD_ALL_ROLES')}</a-->
+                                </td>
+                            </tr>
+                            <tr id="table_row_button nosort">
+                                <td colspan="3">
+                                    <div class="form-text">{$l10n->get('SYS_SSO_SAML_ROLES_DESC')}</div>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {include 'sys-template-parts/form.select.tpl' data=$elements['saml_roles_access']}
         </div>
     </div>
     <div class="form-alert" style="display: none;">&nbsp;</div>

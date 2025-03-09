@@ -111,26 +111,85 @@ class SAMLClient extends Entity
     }
 
     /**
-     * Returns an array with all selected user fields (internal names) to be submitted to the client / Service Provider upon successful login.
-     * @return array<int,int> Returns an array with all selected user field names that are sent to the SAML client.
+     * Returns an associative array with all selected user fields (internal names) to be submitted to the client / Service Provider upon successful login.
+     * The keys are the SAML field names, the values are the Admidio fields. This means, that the same Admidio field can be used for multiple SAML attributes.
+     * @return array<string,string> Returns an array with all selected user field names that are sent to the SAML client. The keys are the SAML field names, the values are the Admidio fields.
      */
-    public function getUserFields(): array
+    public function getFieldMapping(): array
     {
-        $fields = $this->getValue('smc_user_fields');
-        if (empty($fields)) {
+        $fields = $this->getValue('smc_field_mapping', 'database'); // Read the raw string from the database, so html tags don't get replaced!
+        $mapping = json_decode($fields, true);
+        if (empty($mapping)) {
             return array();
         } else {
-            return explode(',', $fields);
+            unset($mapping['*']);
+            return $mapping;
+        }
+    }
+
+    /**
+     * Returns whether all available Admidio profile fiels shall be submitted to the SAML client, too, with the internal field name as attribute name.
+     * @return bool Returns **true** if all available Admidio profile fields shall be submitted to the SAML client, too, with the internal field name as attribute name.
+     */
+    public function getFieldMappingCatchall(): bool
+    {
+        $fields = $this->getValue('smc_field_mapping', 'database')??''; // Read the raw string from the database, so html tags don't get replaced!
+        $mapping = json_decode($fields, true);
+        if (empty($mapping)) {
+            return false;
+        } else {
+            return $mapping['*']??false;
         }
     }
 
     /**
      * Sets the selected user fields to be sent to SAML clients upon login
      */
-    public function setUserFields($fields)
+    public function setFieldMapping($fields, $catchall = false)
     {
-        $fields = array_map('strval', $fields);
-        $this->setValue('smc_user_fields', implode(',', $fields));
+        $fields['*'] = $catchall;
+        $this->setValue('smc_field_mapping', json_encode($fields));
+    }
+
+    /**
+     * Returns an associative array with all selected user roles (internal names) to be submitted to the client / Service Provider upon successful login.
+     * The keys are the SAML role names, the values are the Admidio roles. This means, that the same Admidio role can be used for multiple SAML attributes.
+     * @return array<string,string> Returns an array with all selected user role names that are sent to the SAML client. The keys are the SAML role names, the values are the Admidio roles.
+     */
+    public function getRoleMapping(): array
+    {
+        $roles = $this->getValue('smc_role_mapping', 'database'); // Read the raw string from the database, so html tags don't get replaced!
+        $mapping = json_decode($roles, true);
+        if (empty($mapping)) {
+            return array();
+        } else {
+            unset($mapping['*']);
+            return $mapping;
+        }
+    }
+
+    /**
+     * Returns whether all available Admidio profile fiels shall be submitted to the SAML client, too, with the internal role name as attribute name.
+     * @return bool Returns **true** if all available Admidio profile roles shall be submitted to the SAML client, too, with the internal role name as attribute name.
+     */
+    public function getRoleMappingCatchall(): bool
+    {
+        $roles = $this->getValue('smc_role_mapping', 'database')??''; // Read the raw string from the database, so html tags don't get replaced!
+        $mapping = json_decode($roles, true);
+        if (empty($mapping)) {
+            return false;
+        } else {
+            return $mapping['*']??false;
+        }
+    }
+
+    /**
+     * Sets the selected user roles to be sent to SAML clients upon login
+     */
+    public function setRoleMapping($roles, $catchall = false)
+    {
+        $roles['*'] = $catchall;
+        $this->setValue('smc_role_mapping', json_encode($roles));
     }
 
     /**
@@ -144,7 +203,7 @@ class SAMLClient extends Entity
         if (empty($this->rolesAccess)) {
             return false;
         } else {
-            return $this->rolesAccess->hasRight($gCurrentUser->getRoleMemberships()) || $gCurrentUser->administrateDocumentsFiles();
+            return $this->rolesAccess->hasRight($gCurrentUser->getRoleMemberships()) || $gCurrentUser->isAdministrator();
         }
     }
 

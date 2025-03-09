@@ -35,10 +35,10 @@ try {
     } else {
         $type = 'oidc';
     }
-        // $type = admFuncVariableIsValid(($method == 'GET')?$_GET:$_POST, 'type', 'string')??'oidc';
 
-    if (($type == 'saml') && strpos($requestUri, '/saml/metadata') !== false) {
-        // no login required for saml metadata
+    if ((($type == 'saml') && strpos($requestUri, '/saml/metadata') !== false) ||
+        (($type == 'saml') && strpos($requestUri, '/saml/slo') !== false) ) {
+        // no login required for saml metadata and SLO
     } else {
         require_once($rootPath . '/adm_program/system/login_valid.php');
     }
@@ -85,6 +85,8 @@ try {
             $samlService->handleSSORequest();
         } elseif (strpos($requestUri, '/saml/slo') !== false) {
             $samlService->handleSLORequest();
+//        } elseif (strpos($requestUri, '/saml/attribute-query') !== false) {
+//            $samlService->handleAttributeQuery();
         } else {
             header('HTTP/1.1 404 Not Found');
             echo json_encode(['error' => 'Endpoint not found']);

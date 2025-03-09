@@ -38,6 +38,95 @@ class SSOClientPresenter extends PagePresenter
         parent::__construct($objectUUID);
     }
 
+    protected function createSAMLEditFormJS(array $available, array $config = [], $type = "saml_fields") {
+        global $gL10n;
+
+        $jsInit = '';
+        $js = '$("#saml_fields_tbody").sortable();';
+        
+        $jsInit .= '
+            function createArray_' . $type . '() {
+                var entries = new Array(); ';
+
+        // create an array for all columns with the necessary data
+        foreach ($available as $key => $value) {
+            $jsInit .= '
+                    entries[' . $key . '] 			= new Object();
+                    entries[' . $key . ']["id"]   	= "' . $available[$key][0] . '";
+                    entries[' . $key . ']["data"]   	= "' . $available[$key][1] . '";
+                    entries[' . $key . ']["cat_name"] = "' . $available[$key][2] . '";
+                    ';
+        }
+        $jsInit .= '
+            return entries;
+        }
+        ';
+
+        $jsInit .= '
+            var arr_' . $type . ' = createArray_' . $type . '();
+            var fieldNumberIntern_' . $type . '  = 0;
+        
+            // Function adds a new row for assigning columns to the list
+            function addColumn_' . $type . '(samlField = "", admidioField = "")
+            {
+                var category = "";
+                var table = document.getElementById("' . $type . '_tbody");
+                var newTableRow = table.insertRow(fieldNumberIntern_' . $type . ');
+                newTableRow.setAttribute("id", "row" + (fieldNumberIntern_' . $type . '))
+
+                // New column for selecting the field
+                var newCellAdmidio = newTableRow.insertCell(-1);
+                htmlAdmidioValues = "<select class=\"form-control admidio-field-select\"  size=\"1\" id=\"admidio_' . $type . '" + fieldNumberIntern_' . $type . ' + "\" class=\"List_' . $type . '\" name=\"Admidio_' . $type . '[]\">";
+                for(var counter = 1; counter < arr_' . $type . '.length; counter++) {
+                    if(category !=  arr_' . $type . '[counter]["cat_name"]) {
+                        if(category.length > 0) {
+                            htmlAdmidioValues += "</optgroup>";
+                        }
+                        htmlAdmidioValues += "<optgroup label=\"" +  arr_' . $type . '[counter]["cat_name"] + "\">";
+                        category =  arr_' . $type . '[counter]["cat_name"];
+                    }
+        
+                    var selected = "";
+                    if( arr_' . $type . '[counter]["id"] == admidioField){
+                        selected = " selected=\"selected\" ";
+                    }
+                     htmlAdmidioValues += "<option value=\"" +  arr_' . $type . '[counter]["id"] + "\" " + selected + ">" +  arr_' . $type . '[counter]["data"] + "</option>";
+                }
+                htmlAdmidioValues += "</select>";
+                newCellAdmidio.innerHTML = htmlAdmidioValues;
+        
+                // New column for selecting the mapped name
+                var newCellSAML = newTableRow.insertCell(-1);
+                htmlMappedName = "<input type=\"text\" class=\"form-control saml-field-input\" id=\"saml_' . $type . '" + fieldNumberIntern_' . $type . ' + "\" name=\"SAML_' . $type . '[]\" value=\"" + samlField + "\" size=\"30\" maxlength=\"250\">";
+                newCellSAML.innerHTML = htmlMappedName;
+
+                var newCellButtons = newTableRow.insertCell(-1);
+                newCellButtons.style.paddingLeft = "0";
+                newCellButtons.style.paddingRight = "0";
+                htmlMoveButtons = "<a class=\"admidio-icon-link admidio-move-row-up\" style=\"padding-left: 0pt; padding-right: 0pt;\">" +
+                        "        <i class=\"bi bi-arrow-up-circle-fill\" data-bs-toggle=\"tooltip\" title=\"' . $gL10n->get('SYS_MOVE_UP') . '\"></i></a>" + 
+                        "    <a class=\"admidio-icon-link admidio-move-row-down\" style=\"padding-left: 0pt; padding-right: 0pt;\">" + 
+                        "        <i class=\"bi bi-arrow-down-circle-fill\" data-bs-toggle=\"tooltip\" title=\"' . $gL10n->get('SYS_MOVE_DOWN') . '\"></i></a>" + 
+                        "    <a class=\"admidio-icon-link admidio-move-row\" style=\"padding-left: 0pt; padding-right: 0pt;\">" + 
+                        "        <i class=\"bi bi-arrows-move handle\" data-bs-toggle=\"tooltip\" title=\"' . $gL10n->get('SYS_MOVE_VAR') . '\"></i></a>";
+                newCellButtons.innerHTML = htmlMoveButtons;
+
+                $(newTableRow).fadeIn("slow");
+                fieldNumberIntern_' . $type . '++;
+            }
+            ';
+
+        // Add a row for each configured field / role 
+        $js .= '';
+        foreach ($config as $samlField => $admidioField) {
+            $js .= '
+            addColumn_' . $type . '("' . $samlField . '", "' . $admidioField . '");';
+        }
+
+        return array('js' => $js, 'jsInit' => $jsInit);
+    }
+
+
     /**
      * Create the data for the edit form of a SAML client.
      * @throws Exception
@@ -131,9 +220,9 @@ class SSOClientPresenter extends PagePresenter
         );
 
         $useridFields = [
-            ['usr_id', $gL10n->get('SYS_SSO_USERID_ID') . ' - usr_id', 'SYS_SSO_USERID_FIELDS'], 
-            ['usr_uuid',  $gL10n->get('SYS_SSO_USERID_UUID') . ' - usr_uuid', 'SYS_SSO_USERID_FIELDS'], 
-            ['usr_login_name', $gL10n->get('SYS_SSO_USERID_LOGIN') . ' - usr_login_name', 'SYS_SSO_USERID_FIELDS'], 
+            ['usr_id', $gL10n->get('SYS_SSO_USERID_ID') . ' - usr_id', $gL10n->get('SYS_SSO_USERID_FIELDS')],
+            ['usr_uuid',  $gL10n->get('SYS_SSO_USERID_UUID') . ' - usr_uuid', $gL10n->get('SYS_SSO_USERID_FIELDS')],
+            ['usr_login_name', $gL10n->get('SYS_SSO_USERID_LOGIN') . ' - usr_login_name', $gL10n->get('SYS_SSO_USERID_FIELDS')],
         ];
         $form->addSelectBox(
             'smc_userid_field',
@@ -149,39 +238,90 @@ class SSOClientPresenter extends PagePresenter
 
 
         $userFields = $useridFields;
+        $userFields[] = ['fullname', $gL10n->get('SYS_NAME') . ' - fullname', $gL10n->get('SYS_BASIC_DATA')];
         foreach ($gProfileFields->getProfileFields() as $field) {
             if ($field->getValue('usf_hidden') == 0) {
                 $fieldId = $field->getValue('usf_name_intern');
                 $fieldValue = addslashes($field->getValue('usf_name')) . ' - ' . strtolower($fieldId);
-                $fieldCat = $field->getValue('cat_name');
+                $fieldCat = $gL10n->translateIfTranslationStrId($field->getValue('cat_name'));
                 $userFields[] =  [$fieldId, $fieldValue, $fieldCat];
             }
         }
-        $userFields[] = ['roles', $gL10n->get('SYS_ROLES') . ' - roles', 'SYS_ROLES'];
+        $userFields[] = ['roles', $gL10n->get('SYS_ROLES') . ' - roles', $gL10n->get('SYS_ROLES')];
+
+        $js = $this->createSAMLEditFormJS( $userFields, $client->getFieldMapping(), "saml_fields");
+        $this->addJavascript($js['jsInit'], false);
+        $this->addJavascript($js['js'], true);
+        $this->addJavascript('$("#saml_fields_tbody").sortable({cancel: ".nosort, input, select, .admidio-move-row-up, .admidio-move-row-down"});', true);
+
+        // Add dummy elements for the mapping arrays, otherwise the form processing function will complain!!!
+        $form->addCustomContent("Admidio_saml_fields", '', '');
+        $form->addCustomContent("SAML_saml_fields", '', '');
+
+        $form->addCheckbox(
+            'saml_fields_all_other',
+            $gL10n->get('SYS_SSO_SAML_ATTRIBUTES_ALLOTHER'),
+            $client->getFieldMappingCatchall(),
+            array('helpTextId' => '')
+        );
+
+        
+        $js = $this->createSAMLEditFormJS($allRolesSet, $client->getRoleMapping(), "saml_roles");
+        $this->addJavascript($js['jsInit'], false);
+        $this->addJavascript($js['js'], true);
+        $this->addJavascript('$("#saml_roless_tbody").sortable({cancel: ".nosort, input, select, .admidio-move-row-up, .admidio-move-row-down"});', true);
+        // Add dummy elements for the mapping arrays, otherwise the form processing function will complain!!!
+        $form->addCustomContent("Admidio_saml_roles", '', '');
+        $form->addCustomContent("SAML_saml_roles", '', '');
+
+        $form->addCheckbox(
+            'saml_roles_all_other',
+            $gL10n->get('SYS_SSO_SAML_ROLES_ALLOTHER'),
+            $client->getRoleMappingCatchall(),
+            array('helpTextId' => '')
+        );
+
+        // Add JS code for the move UP/DOWN "buttons":
+        $this->addJavascript('
+                $(document).on("click", ".admidio-move-row-up", function(){
+                    let row = $(this).closest("tr");
+                    let prevRow = row.prev("tr");
+                    if (prevRow.length) {
+                        row.insertBefore(prevRow);
+                    }
+                });
+                $(document).on("click", ".admidio-move-row-down", function(){
+                    let row = $(this).closest("tr");
+                    let nextRow = row.next();
+                    if (nextRow.length) {
+                        row.insertAfter(nextRow);
+                    }
+                });
+                ', true);
+
+        // Add JS code to set the saml field input to the Admidio field name if no name was set yet
+        $this->addJavascript('
+                $(document).on("change", "select.admidio-field-select", function(){
+                    let row = $(this).closest("tr");
+                    var input = row.find("input.saml-field-input");
+                    if (input && input.val().trim() === "") {
+                        input.val($(this).val().toLowerCase());
+                    }
+                });
+                ', true);
+
 
         $form->addSelectBox(
-            'sso_saml_fields',
-            $gL10n->get('SYS_SSO_SAML_ATTRIBUTES'),
-            $userFields,
+            'saml_roles_access',
+            $gL10n->get('SYS_SSO_ROLES'),
+            $allRolesSet,
             array(
                 'property' => FormPresenter::FIELD_DEFAULT,
-                'defaultValue' => $client->getUserFields(),
+                'defaultValue' => $client->getAccessRolesIds(),
                 'multiselect' => true,
-                'helpTextId' => 'SYS_SSO_SAML_ATTRIBUTES_DESC'
-                )
-            );
-            
-            $form->addSelectBox(
-                'sso_saml_roles',
-                $gL10n->get('SYS_SSO_ROLES'),
-                $allRolesSet,
-                array(
-                    'property' => FormPresenter::FIELD_DEFAULT,
-                    'defaultValue' => $client->getAccessRolesIds(),
-                    'multiselect' => true,
-                    'helpTextId' => 'SYS_SSO_ROLES_DESC'
-                )
-            );
+                'helpTextId' => 'SYS_SSO_ROLES_DESC'
+            )
+        );
     
         
         $form->addSubmitButton(
@@ -347,10 +487,11 @@ class SSOClientPresenter extends PagePresenter
         $SAMLService = new SAMLService($gDb, $gCurrentUser);
         $templateClientNodes = array();
         foreach ($SAMLService->getUUIDs() as $clientUUID) {
+            $clientEditURL = SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_PLUGINS . '/sso/clients.php', array('mode' => 'edit_saml', 'uuid' => $clientUUID));
             $client = new SAMLClient($gDb);
             $client->readDataByUuid($clientUUID);
             $templateClient = array();
-            $templateClient[] = $client->getValue('smc_client_name');
+            $templateClient[] = '<a href="' . $clientEditURL . '">' . $client->getValue('smc_client_name') . '</a>';
             $templateClient[] = $client->getValue('smc_client_id');
             $templateClient[] = $client->getValue('smc_acs_url');
             $templateClient[] = implode(', ', $client->getAccessRolesNames());
@@ -358,7 +499,7 @@ class SSOClientPresenter extends PagePresenter
 
             $actions = '';
             // add link to edit SAML client
-            $actions .= '<a class="admidio-icon-link" href="' . SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_PLUGINS . '/sso/clients.php', array('mode' => 'edit_saml', 'uuid' => $clientUUID)) . '">' .
+            $actions .= '<a class="admidio-icon-link" href="' . $clientEditURL . '">' .
                     '<i class="bi bi-pencil-square" data-bs-toggle="tooltip" title="' . $gL10n->get('SYS_SSO_EDIT_SAML_CLIENT') . '"></i></a>';
             
             // add link to delete SAML client

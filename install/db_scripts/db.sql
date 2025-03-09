@@ -588,7 +588,8 @@ CREATE TABLE %PREFIX%_saml_clients (
     smc_x509_certificate        TEXT                NOT NULL,
     -- smc_allowed_roles           TEXT                NULL, -- role-based access is modelled via role rights
     smc_userid_field            varchar(50)         NOT NULL    default 'usr_id',
-    smc_user_fields             text                NULL,
+    smc_field_mapping           text                NULL,
+    smc_role_mapping            text                NULL,
 
     smc_usr_id_create           integer unsigned,
     smc_timestamp_create        timestamp           NOT NULL    DEFAULT CURRENT_TIMESTAMP,
