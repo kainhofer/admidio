@@ -15,7 +15,7 @@ class UserRepository implements UserRepositoryInterface
     protected array $allowedRoles; // Roles that are permitted to use OIDC
     protected string $uid_field;
 
-    public function __construct($database, string $uid_field = 'usr_id', array $allowedRoles)
+    public function __construct($database, string $uid_field = 'usr_id', array $allowedRoles = [])
     {
         $this->db = $database; // Using Admidio's $gDb instance
         $this->allowedRoles = $allowedRoles;
