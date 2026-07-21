@@ -1807,4 +1807,24 @@
   <string name="SYS_YOUR_LISTS">Deine Listen</string>
   <string name="SYS_YOUR_NAME">Dein Name</string>
   <string name="SYS_Z_TO_A">Z bis A</string>
+
+  <string name="SYS_REQUIREMENTS">Anforderungen</string>
+  <string name="SYS_REQ_MODULE_ENABLED">Anforderungsmodul aktivieren</string>
+  <string name="SYS_REQ_MODULE_ENABLED_DESC">Aktiviert das Anforderungsmodul für diese Organisation.</string>
+  <string name="SYS_REQ_PROVIDERS">Anbieter</string>
+  <string name="SYS_REQ_PROVIDER">Anbieter</string>
+  <string name="SYS_REQ_PROVIDER_CREATE">Anbieter erstellen</string>
+  <string name="SYS_REQ_PROVIDER_EDIT">Anbieter bearbeiten</string>
+  <string name="SYS_REQ_PROVIDER_DELETE_CONFIRM">Soll der Anbieter "%s" wirklich gelöscht werden?</string>
+  <string name="SYS_REQ_PROVIDER_DELETED">Der Anbieter wurde gelöscht.</string>
+  <string name="SYS_REQ_PROVIDER_SEARCH">Anbieter suchen</string>
+
+  <string name="SYS_REQ_PROVIDER_QUALIFIED">Qualifizierter Anbieter</string>
+  <string name="SYS_REQ_PROVIDER_QUALIFIED_DESC">Qualifizierte Anbieter können später für eine vereinfachte Anerkennung oder automatische Klassifikation von Credits verwendet werden.</string>
+
+  <string name="SYS_REQ_PROVIDER_PUBLIC">Öffentlich</string>
+  <string name="SYS_REQ_PROVIDER_PUBLIC_DESC">Öffentliche Anbieter sind für alle Benutzer der aktuellen Organisation sichtbar.</string>
+
+  <string name="SYS_REQ_PROVIDER_EDITABLE">Von allen Benutzern bearbeitbar</string>
+  <string name="SYS_REQ_PROVIDER_EDITABLE_DESC">Wenn aktiviert, dürfen alle angemeldeten Benutzer diesen Anbieter bearbeiten.</string>
 </resources>

@@ -1813,4 +1813,25 @@
   <string name="SYS_YOUR_LISTS">Own lists</string>
   <string name="SYS_YOUR_NAME">Your name</string>
   <string name="SYS_Z_TO_A">Z to A</string>
+
+  <string name="SYS_REQUIREMENTS">Requirements</string>
+  <string name="SYS_REQ_MODULE_ENABLED">Enable requirements module</string>
+  <string name="SYS_REQ_MODULE_ENABLED_DESC">Enables the requirements module for this organization.</string>
+  <string name="SYS_REQ_MODULE_DISABLED">The requirements module is disabled.</string>
+  <string name="SYS_REQ_PROVIDERS">Providers</string>
+  <string name="SYS_REQ_PROVIDER">Provider</string>
+  <string name="SYS_REQ_PROVIDER_CREATE">Create provider</string>
+  <string name="SYS_REQ_PROVIDER_EDIT">Edit provider</string>
+  <string name="SYS_REQ_PROVIDER_DELETE_CONFIRM">Do you really want to delete provider "%s"?</string>
+  <string name="SYS_REQ_PROVIDER_DELETED">The provider was deleted.</string>
+  <string name="SYS_REQ_PROVIDER_SEARCH">Search providers</string>
+  
+  <string name="SYS_REQ_PROVIDER_QUALIFIED">Qualified provider</string>
+  <string name="SYS_REQ_PROVIDER_QUALIFIED_DESC">Qualified providers can later be used for simplified recognition or automatic classification of requirement credits.</string>
+  
+  <string name="SYS_REQ_PROVIDER_PUBLIC">Public</string>
+  <string name="SYS_REQ_PROVIDER_PUBLIC_DESC">Public providers are visible to all users of the current organization.</string>
+  
+  <string name="SYS_REQ_PROVIDER_EDITABLE">Editable by all users</string>
+  <string name="SYS_REQ_PROVIDER_EDITABLE_DESC">If enabled, all logged-in users may edit this provider entry.</string>
 </resources>

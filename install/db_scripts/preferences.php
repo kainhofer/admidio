@@ -93,6 +93,8 @@ $defaultOrgPreferences = array(
     'changelog_table_inventory_items' => '0',
     'changelog_table_inventory_item_data' => '0',
     'changelog_table_inventory_item_borrow_data' => '0',
+    'changelog_table_requirements' => '0',
+    'changelog_table_req_provider' => '0',
     'changelog_table_saml_clients' => '0',
     'changelog_table_oidc_clients' => '0',
     'changelog_table_others' => '0',
@@ -242,6 +244,9 @@ $defaultOrgPreferences = array(
     'profile_show_extern_roles' => '1',
     'profile_membership_duration_exact' => '1',
     'profile_photo_storage' => '0',
+
+    // Requirements Tracker
+    'requirements_module_enabled' => '0',
 
     // Single-sign-on (SAML, OIDC)
     'sso_saml_enabled' => '0',

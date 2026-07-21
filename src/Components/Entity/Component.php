@@ -200,6 +200,7 @@ class Component extends Entity
                 case 'ORGANIZATIONS': // fallthrough
                 case 'PREFERENCES': // fallthrough
                 case 'PLUGINS': // fallthrough
+                case 'REQUIREMENTS': // fallthrough
                 case 'ROOMS':
                     if ($gCurrentUser->isAdministrator()) {
                         return true;
@@ -316,6 +317,12 @@ class Component extends Entity
 
             case 'REGISTRATION':
                 if ($gSettingsManager->getBool('registration_module_enabled') && $gCurrentUser->isAdministratorRegistration()) {
+                    return true;
+                }
+                break;
+
+            case 'REQUIREMENTS':
+                if ($gSettingsManager->getBool('requirements_module_enabled') && $gValidLogin) {
                     return true;
                 }
                 break;
