@@ -58,6 +58,7 @@ DROP TABLE IF EXISTS %PREFIX%_inventory_item_borrow_data        CASCADE;
 DROP TABLE IF EXISTS %PREFIX%_inventory_items                   CASCADE;
 DROP TABLE IF EXISTS %PREFIX%_saml_clients                      CASCADE;
 DROP TABLE IF EXISTS %PREFIX%_sso_keys                          CASCADE;
+DROP TABLE IF EXISTS %PREFIX%_req_providers                     CASCADE;
 
 
 
@@ -1138,6 +1139,41 @@ COLLATE = utf8mb4_unicode_ci;
 CREATE UNIQUE INDEX %PREFIX%_idx_ini_uuid ON %PREFIX%_inventory_items (ini_uuid);
 
 /*==============================================================*/
+/* Table: adm_req_providers                                     */
+/*==============================================================*/
+
+CREATE TABLE %PREFIX%_req_providers (
+    rqp_id                  INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    rqp_uuid                CHAR(36)     NOT NULL,
+    rqp_org_id              INT UNSIGNED NOT NULL,
+
+    rqp_name                VARCHAR(255) NOT NULL,
+    rqp_address             TEXT NULL,
+    rqp_url                 VARCHAR(500) NULL,
+    rqp_description         TEXT NULL,
+
+    rqp_qualified           TINYINT(1)   NOT NULL DEFAULT 0,
+    rqp_public              TINYINT(1)   NOT NULL DEFAULT 1,
+    rqp_editable            TINYINT(1)   NOT NULL DEFAULT 0,
+
+    rqp_timestamp_create    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    rqp_usr_id_create       INT UNSIGNED NULL,
+    rqp_timestamp_change    DATETIME     NULL,
+    rqp_usr_id_change       INT UNSIGNED NULL,
+
+    PRIMARY KEY (rqp_id),
+    UNIQUE KEY %PREFIX%_idx_req_providers_uuid (rqp_uuid),
+    KEY %PREFIX%_idx_req_providers_org (rqp_org_id),
+    KEY %PREFIX%_idx_req_providers_name (rqp_name),
+    KEY %PREFIX%_idx_req_providers_public (rqp_public),
+    KEY %PREFIX%_idx_req_providers_editable (rqp_editable),
+    KEY %PREFIX%_idx_req_providers_qualified (rqp_qualified),
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
+
+/*==============================================================*/
 /* Table: adm_log_changes                                       */
 /*    Generic table for logging changes to various other tables */
 /*    The meaning of the subsequent columns depend heavily on   */
@@ -1390,3 +1426,6 @@ ALTER TABLE %PREFIX%_inventory_items
     ADD CONSTRAINT %PREFIX%_fk_ini_status      FOREIGN KEY (ini_status)         REFERENCES %PREFIX%_inventory_field_select_options (ifo_id) ON DELETE RESTRICT ON UPDATE RESTRICT,
     ADD CONSTRAINT %PREFIX%_fk_ini_usr_create  FOREIGN KEY (ini_usr_id_create)  REFERENCES %PREFIX%_users (usr_id)               ON DELETE SET NULL ON UPDATE RESTRICT,
     ADD CONSTRAINT %PREFIX%_fk_ini_usr_change  FOREIGN KEY (ini_usr_id_change)  REFERENCES %PREFIX%_users (usr_id)               ON DELETE SET NULL ON UPDATE RESTRICT;
+
+ALTER TABLE %PREFIX%_req_providers
+    ADD CONSTRAINT %PREFIX%_fk_rqp_org         FOREIGN KEY (rqp_org_id)         REFERENCES %PREFIX%_organizations (org_id)       ON DELETE RESTRICT ON UPDATE RESTRICT;

@@ -201,6 +201,9 @@ class ChangelogService {
 
             'photos' => 'SYS_PHOTO_ALBUMS',
 
+            'requirements' => 'SYS_REQUIREMENTS',
+            'req_providers' => 'SYS_REQ_PROVIDERS',
+
             'lists' => 'SYS_LIST',
             'list_columns' => 'SYS_LIST_COLUMNS', // Changes to the list column are handled as changes to the list -> list_columns is never displayed as affected table
 

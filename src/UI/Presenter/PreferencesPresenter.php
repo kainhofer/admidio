@@ -174,6 +174,7 @@ class PreferencesPresenter extends PagePresenter
                     array('id'=>'inventory',            'title'=>$gL10n->get('SYS_INVENTORY'),              'icon'=>'bi-box-seam-fill',                 'subcards'=>false),
                     array('id'=>'photos',               'title'=>$gL10n->get('SYS_PHOTOS'),                 'icon'=>'bi-image-fill',                    'subcards'=>false),
                     array('id'=>'links',                'title'=>$gL10n->get('SYS_WEBLINKS'),               'icon'=>'bi-link-45deg',                    'subcards'=>false),
+                    array('id'=>'requirements',         'title'=>$gL10n->get('SYS_REQUIREMENTS'),           'icon'=>'bi-clipboard-check',               'subcards'=>false),
                 )
             ),
 
@@ -505,7 +506,7 @@ class PreferencesPresenter extends PagePresenter
                     array(
                         'title' => $gL10n->get('SYS_HEADER_CONTENT_MODULES'),
                         'id' => 'content_modules',
-                        'tables' => array('files', 'folders', 'photos', 'announcements', 'events', 'rooms', 'forum_topics', 'forum_posts', 'inventory_fields', 'inventory_field_select_options', 'inventory_items', 'inventory_item_data', 'inventory_item_borrow_data', 'links', 'others')
+                        'tables' => array('files', 'folders', 'photos', 'announcements', 'events', 'rooms', 'forum_topics', 'forum_posts', 'inventory_fields', 'inventory_field_select_options', 'inventory_items', 'inventory_item_data', 'inventory_item_borrow_data', 'links', 'req_providers', 'others')
                     ),
                     array(
                         'title' => $gL10n->get('SYS_HEADER_PREFERENCES'),
@@ -2174,6 +2175,47 @@ class PreferencesPresenter extends PagePresenter
         $formRegistration->addToSmarty($smarty);
         $gCurrentSession->addFormObject($formRegistration);
         return $smarty->fetch('preferences/preferences.registration.tpl');
+    }
+
+    /**
+     * Generates the HTML of the form from the requirements preferences and will return the complete HTML.
+     * @return string Returns the complete HTML of the form from the requirements preferences.
+     * @throws Exception
+     * @throws \Smarty\Exception
+     */
+    public function createRequirementsForm(): string
+    {
+        global $gL10n, $gSettingsManager, $gCurrentSession;
+
+        $formValues = $gSettingsManager->getAll();
+
+        $formRequirements = new FormPresenter(
+            'adm_preferences_form_requirements',
+            'preferences/preferences.requirements.tpl',
+            SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_MODULES . '/preferences.php', array('mode' => 'save', 'panel' => 'rquirements')),
+            null,
+            array('class' => 'form-preferences')
+        );
+        $selectBoxEntries = array(
+            '0' => $gL10n->get('SYS_DISABLED'),
+            '1' => $gL10n->get('SYS_ENABLED')
+        );
+        $formRequirements->addSelectBox(
+            'requirements_module_enabled',
+            $gL10n->get('ORG_ACCESS_TO_MODULE'),
+            $selectBoxEntries,
+            array('defaultValue' => $formValues['requirements_module_enabled'], 'showContextDependentFirstEntry' => false, 'helpTextId' => 'ORG_ACCESS_TO_MODULE_DESC')
+        );
+        $formRequirements->addSubmitButton(
+            'adm_button_save_requirements',
+            $gL10n->get('SYS_SAVE'),
+            array('icon' => 'bi-check-lg', 'class' => 'offset-sm-3')
+        );
+
+        $smarty = $this->getSmartyTemplate();
+        $formRequirements->addToSmarty($smarty);
+        $gCurrentSession->addFormObject($formRequirements);
+        return $smarty->fetch('preferences/preferences.requirements.tpl');
     }
 
     /**
