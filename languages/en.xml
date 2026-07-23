@@ -1820,6 +1820,7 @@
   <string name="SYS_REQ_MODULE_DISABLED">The requirements module is disabled.</string>
   <string name="SYS_REQ_PROVIDERS">Providers</string>
   <string name="SYS_REQ_PROVIDER">Provider</string>
+  <string name="SYS_REQ_PROVIDER_INFO">Provider information</string>
   <string name="SYS_REQ_PROVIDER_CREATE">Create provider</string>
   <string name="SYS_REQ_PROVIDER_EDIT">Edit provider</string>
   <string name="SYS_REQ_PROVIDER_DELETE_CONFIRM">Do you really want to delete provider "%s"?</string>
@@ -1834,4 +1835,36 @@
   
   <string name="SYS_REQ_PROVIDER_EDITABLE">Editable by all users</string>
   <string name="SYS_REQ_PROVIDER_EDITABLE_DESC">If enabled, all logged-in users may edit this provider entry.</string>
+  <string name="SYS_REQ_ACTIVITIES">Activities</string>
+  <string name="SYS_REQ_ACTIVITY">Activity</string>
+  <string name="SYS_REQ_ACTIVITY_SEARCH">Search activities</string>
+  <string name="SYS_REQ_ATTENDANCE">Attendance</string>
+  <string name="SYS_REQ_ATTENDANCE_DESC">Actual time of attendance in hours. This is not necessarily identical to credits granted for specific requirements.</string>
+  <string name="SYS_REQ_BEGIN_DATE">Begin date</string>
+  <string name="SYS_REQ_BEGIN_TIME">Begin time</string>
+  <string name="SYS_REQ_END_DATE">End date</string>
+  <string name="SYS_REQ_END_TIME">End time</string>
+  <string name="SYS_REQ_REVIEW">Review</string>
+  <string name="SYS_REQ_REVIEW_COMMENTS">Review comments</string>
+  <string name="SYS_REQ_REVIEW_STATUS">Review status</string>
+  <string name="SYS_REQ_REVIEW_STATUS_OPEN">Open</string>
+  <string name="SYS_REQ_REVIEW_STATUS_ACCEPTED">Accepted</string>
+  <string name="SYS_REQ_REVIEW_STATUS_PARTIALLY_ACCEPTED">Partially accepted</string>
+  <string name="SYS_REQ_REVIEW_STATUS_NOT_ACCEPTED">Not accepted</string>
+  <string name="SYS_REQ_REVIEW_STATUS_CLARIFICATION">Clarification required</string>
+  <string name="SYS_REQ_STATUS">Status</string>
+  <string name="SYS_REQ_STATUS_SUBMITTED">Submitted</string>
+  <string name="SYS_REQ_STATUS_WITHDRAWN">Withdrawn</string>
+  <string name="SYS_REQ_STATUS_DRAFT">Draft</string>
+  <string name="SYS_REQ_STATUS_ACCEPTED">Accepted</string>
+  <string name="SYS_REQ_STATUS_REJECTED">Rejected</string>
+  <string name="SYS_REQ_PROVIDER_SELECT_DESC">If the provider is missing, create it first using the page function above.</string>
+  <string name="SYS_REQ_PROVIDER_SHORT_NAME">Short name</string>
+  <string name="SYS_REQ_PROVIDER_SHORT_NAME_DESC">Short display name used in activity lists and compact views.</string>
+  <string name="SYS_REQ_PROVIDER_SELECT_DESC">If the provider is missing, create it first using the page function above.</string>
+  <string name="SYS_REQ_ACTIVITY_LOCATION_DESC">Location, address, online meeting information, or other location-related note.</string>
+  <string name="SYS_REQ_LOCATION">Location</string>
+  <string name="SYS_REQ_FULL_DAY">Full day</string>
+  <string name="SYS_REQ_FULL_DAY_DESC">If selected, no start or end time is stored for this activity.</string>
+
 </resources>

@@ -202,6 +202,7 @@ class ChangelogService {
             'photos' => 'SYS_PHOTO_ALBUMS',
 
             'requirements' => 'SYS_REQUIREMENTS',
+            'req_activities' => 'SYS_REQ_ACTIVITIES',
             'req_providers' => 'SYS_REQ_PROVIDERS',
 
             'lists' => 'SYS_LIST',
@@ -330,6 +331,10 @@ class ChangelogService {
             case 'inventory_item_borrow_data':
             case 'inventory_items':
                 return new Item($gDb);
+            case 'req_providers':
+                return new \Admidio\Requirements\Entity\Provider($gDb);
+            case 'req_activities':
+                return new \Admidio\Requirements\Entity\Activity($gDb);
             default:
                 return null;
         }
@@ -660,6 +665,25 @@ class ChangelogService {
             'key_expires_at' =>             array('name' => 'SYS_SSO_KEY_EXPIRES', 'type' => 'DATETIME'),
             'key_is_active' =>              array('name' => 'SYS_SSO_KEY_ACTIVE', 'type' => 'BOOL'),
 
+            'rqa_user_id'                   => 'SYS_USER',
+            'rqa_provider_id'               => 'SYS_REQ_PROVIDER',
+            'rqa_provider_name'             => 'SYS_REQ_PROVIDER',
+            'rqa_provider_short_name'       => 'SYS_REQ_PROVIDER_SHORT_NAME',
+            'rqa_title'                     => 'SYS_TITLE',
+            'rqa_description'               => 'SYS_DESCRIPTION',
+            'rqa_url'                       => 'SYS_WEBSITE',
+            'rqa_location'                  => 'SYS_REQ_LOCATION',
+            'rqa_begin_date'                => 'SYS_REQ_BEGIN_DATE',
+            'rqa_begin_time'                => 'SYS_REQ_BEGIN_TIME',
+            'rqa_end_date'                  => 'SYS_REQ_END_DATE',
+            'rqa_end_time'                  => 'SYS_REQ_END_TIME',
+            'rqa_attendance'                => 'SYS_REQ_ATTENDANCE',
+            'rqa_comments'                  => 'SYS_COMMENT',
+            'rqa_status'                    => 'SYS_REQ_STATUS',
+            'rqa_review_comments'           => 'SYS_REQ_REVIEW_COMMENTS',
+            'rqa_review_status'             => 'SYS_REQ_REVIEW_STATUS',
+
+            'rqp_short_name'                => 'SYS_REQ_PROVIDER_SHORT_NAME',
         );
         return array_merge($translations, self::$customCallbacks['getFieldTranslations']);
     }

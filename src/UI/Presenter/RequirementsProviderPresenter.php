@@ -90,6 +90,15 @@ class RequirementsProviderPresenter extends PagePresenter
                 'property'  => FormPresenter::FIELD_REQUIRED
             )
         );
+        $form->addInput(
+            'rqp_short_name',
+            $gL10n->get('SYS_REQ_PROVIDER_SHORT_NAME'),
+            htmlentities((string) $provider->getValue('rqp_short_name', 'database'), ENT_QUOTES),
+            array(
+                'maxLength' => 255,
+                'helpTextId' => 'SYS_REQ_PROVIDER_SHORT_NAME_DESC'
+            )
+        );        
 
         $form->addMultilineTextInput(
             'rqp_address',
@@ -226,6 +235,7 @@ class RequirementsProviderPresenter extends PagePresenter
             $templateProvider = array(
                 'uuid'        => $provider->getValue('rqp_uuid'),
                 'name'        => $provider->getValue('rqp_name'),
+                'shortName'   => $provider->getValue('rqp_short_name'),
                 'description' => $provider->getValue('rqp_description'),
                 'url'         => $provider->getValue('rqp_url'),
                 'qualified'   => (bool) $provider->getValue('rqp_qualified'),

@@ -40,14 +40,13 @@ class Provider extends Entity
     public function isVisible(): bool
     {
         global $gValidLogin, $gCurrentUserId;
-        if (!$gValidLogin) {
-            return false;
-        }
-        return ((bool) $this->getValue('rqp_public')
-            || Component::isAdministrable('REQUIREMENTS')
-            || $this->isEditable()
-            || ((int) $this->getValue('rqp_usr_id_create') === $gCurrentUserId)
-        );
+        return $gValidLogin
+            && (
+                (bool) $this->getValue('rqp_public')
+                || Component::isAdministrable('REQUIREMENTS')
+                || $this->isEditable()
+                || ((int) $this->getValue('rqp_usr_id_create') === $gCurrentUserId)
+            );
     }
 
     /**
@@ -65,14 +64,12 @@ class Provider extends Entity
     public function isEditable(): bool
     {
         global $gCurrentUserId, $gValidLogin;
-
-        if (!$gValidLogin) {
-            return false;
-        }
-        return ((bool) $this->getValue('rqp_editable')
-            || Component::isAdministrable('REQUIREMENTS')
-            || ((int) $this->getValue('rqp_usr_id_create') === $gCurrentUserId)
-        );
+        return $gValidLogin
+            && (
+                (bool) $this->getValue('rqp_editable')
+                || Component::isAdministrable('REQUIREMENTS')
+                || ((int) $this->getValue('rqp_usr_id_create') === $gCurrentUserId)
+            );
     }
 
     /**
@@ -85,12 +82,11 @@ class Provider extends Entity
     public function isDeletable(): bool
     {
         global $gCurrentUserId, $gValidLogin;
-
-        if (!$gValidLogin) {
-            return false;
-        }
-        return Component::isAdministrable('REQUIREMENTS') 
-            || ((int) $this->getValue('rqp_usr_id_create') === $gCurrentUserId);
+        return $gValidLogin 
+            && ( 
+                Component::isAdministrable('REQUIREMENTS') 
+                || ((int) $this->getValue('rqp_usr_id_create') === $gCurrentUserId)
+            );
     }
 
 
@@ -98,11 +94,11 @@ class Provider extends Entity
     public function canChangeVisibilityFlags(): bool
     {
         global $gValidLogin, $gCurrentUserId;
-        if (!$gValidLogin) {
-            return false;
-        }
-        return Component::isAdministrable('REQUIREMENTS')
-           || (int) $this->getValue('rqp_usr_id_create') === $gCurrentUserId;
+        return $gValidLogin 
+            && (
+                Component::isAdministrable('REQUIREMENTS')
+                || (int) $this->getValue('rqp_usr_id_create') === $gCurrentUserId
+            );
     }
 
     /**
@@ -116,6 +112,7 @@ class Provider extends Entity
     {
         return match ($field) {
             'rqp_name'          => 'SYS_NAME',
+            'rqp_short_name'    => 'SYS_REQ_PROVIDER_SHORT_NAME',
             'rqp_address'       => 'SYS_ADDRESS',
             'rqp_url'           => 'SYS_WEBSITE',
             'rqp_description'   => 'SYS_DESCRIPTION',

@@ -141,6 +141,7 @@ const TBL_ORGANIZATIONS = TABLE_PREFIX . '_organizations';
 const TBL_PHOTOS = TABLE_PREFIX . '_photos';
 const TBL_PREFERENCES = TABLE_PREFIX . '_preferences';
 const TBL_REGISTRATIONS = TABLE_PREFIX . '_registrations';
+const TBL_REQ_ACTIVITIES = TABLE_PREFIX . '_req_activities';
 const TBL_REQ_PROVIDERS = TABLE_PREFIX . '_req_providers';
 const TBL_ROLE_DEPENDENCIES = TABLE_PREFIX . '_role_dependencies';
 const TBL_ROLES = TABLE_PREFIX . '_roles';
