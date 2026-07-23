@@ -1143,35 +1143,89 @@ CREATE UNIQUE INDEX %PREFIX%_idx_ini_uuid ON %PREFIX%_inventory_items (ini_uuid)
 /*==============================================================*/
 
 CREATE TABLE %PREFIX%_req_providers (
-    rqp_id                  INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    rqp_uuid                CHAR(36)     NOT NULL,
-    rqp_org_id              INT UNSIGNED NOT NULL,
+    rqp_id                  integer unsigned NOT NULL AUTO_INCREMENT,
+    rqp_uuid                varchar(36)      NOT NULL,
+    rqp_org_id              integer unsigned NOT NULL,
 
-    rqp_name                VARCHAR(255) NOT NULL,
-    rqp_address             TEXT NULL,
-    rqp_url                 VARCHAR(500) NULL,
-    rqp_description         TEXT NULL,
+    rqp_name                varchar(255)     NOT NULL,
+    rqp_short_name          varchar(255)     NULL,
+    rqp_address             text             NULL,
+    rqp_url                 varchar(2000)    NULL,
+    rqp_description         text             NULL,
 
-    rqp_qualified           TINYINT(1)   NOT NULL DEFAULT 0,
-    rqp_public              TINYINT(1)   NOT NULL DEFAULT 1,
-    rqp_editable            TINYINT(1)   NOT NULL DEFAULT 0,
+    rqp_qualified           boolean          NOT NULL DEFAULT false,
+    rqp_public              boolean          NOT NULL DEFAULT true,
+    rqp_editable            boolean          NOT NULL DEFAULT false,
 
-    rqp_timestamp_create    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    rqp_usr_id_create       INT UNSIGNED NULL,
-    rqp_timestamp_change    DATETIME     NULL,
-    rqp_usr_id_change       INT UNSIGNED NULL,
+    rqp_usr_id_create       integer unsigned,
+    rqp_timestamp_create    timestamp        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    rqp_usr_id_change       integer unsigned,
+    rqp_timestamp_change    timestamp        NULL DEFAULT NULL,
 
     PRIMARY KEY (rqp_id),
     UNIQUE KEY %PREFIX%_idx_req_providers_uuid (rqp_uuid),
     KEY %PREFIX%_idx_req_providers_org (rqp_org_id),
     KEY %PREFIX%_idx_req_providers_name (rqp_name),
+    KEY %PREFIX%_idx_req_providers_short_name (rqp_short_name),
     KEY %PREFIX%_idx_req_providers_public (rqp_public),
     KEY %PREFIX%_idx_req_providers_editable (rqp_editable),
-    KEY %PREFIX%_idx_req_providers_qualified (rqp_qualified),
+    KEY %PREFIX%_idx_req_providers_qualified (rqp_qualified)
 )
 ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_unicode_ci;
+
+
+/*==============================================================*/
+/* Table: adm_req_activities                                  */
+/*==============================================================*/
+
+CREATE TABLE %PREFIX%_req_activities (
+    rqa_id                  integer unsigned NOT NULL AUTO_INCREMENT,
+    rqa_uuid                varchar(36)      NOT NULL,
+    rqa_org_id              integer unsigned NOT NULL,
+    rqa_user_id             integer unsigned NOT NULL,
+    rqa_provider_id         integer unsigned NULL,
+
+    rqa_provider_name       varchar(255)     NULL,
+    rqa_provider_short_name varchar(255)     NULL,
+
+    rqa_title               varchar(255)     NOT NULL,
+    rqa_description         text             NULL,
+    rqa_url                 varchar(2000)    NULL,
+    rqa_location            text             NULL,
+
+    rqa_begin_date          date             NOT NULL,
+    rqa_begin_time          time             NULL,
+    rqa_end_date            date             NULL,
+    rqa_end_time            time             NULL,
+    rqa_attendance          decimal(5,2)     NULL DEFAULT 0.00,
+
+    rqa_comments            text             NULL,
+    rqa_status              varchar(32)      NOT NULL DEFAULT 'submitted',
+
+    rqa_review_comments     text             NULL,
+    rqa_review_status       varchar(32)      NULL,
+
+    rqa_usr_id_create       integer unsigned,
+    rqa_timestamp_create    timestamp        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    rqa_usr_id_change       integer unsigned,
+    rqa_timestamp_change    timestamp        NULL DEFAULT NULL,
+
+    PRIMARY KEY (rqa_id),
+    UNIQUE KEY %PREFIX%_idx_req_activities_uuid (rqa_uuid),
+    KEY %PREFIX%_idx_req_activities_org (rqa_org_id),
+    KEY %PREFIX%_idx_req_activities_user (rqa_user_id),
+    KEY %PREFIX%_idx_req_activities_provider (rqa_provider_id),
+    KEY %PREFIX%_idx_req_activities_status (rqa_status),
+    KEY %PREFIX%_idx_req_activities_review_status (rqa_review_status),
+    KEY %PREFIX%_idx_req_activities_begin_date (rqa_begin_date),
+    KEY %PREFIX%_idx_req_activities_user_date (rqa_user_id, rqa_begin_date)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
+
 
 /*==============================================================*/
 /* Table: adm_log_changes                                       */
@@ -1429,3 +1483,8 @@ ALTER TABLE %PREFIX%_inventory_items
 
 ALTER TABLE %PREFIX%_req_providers
     ADD CONSTRAINT %PREFIX%_fk_rqp_org         FOREIGN KEY (rqp_org_id)         REFERENCES %PREFIX%_organizations (org_id)       ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+ALTER TABLE %PREFIX%_req_activities
+    ADD CONSTRAINT %PREFIX%_fk_rqa_provider    FOREIGN KEY (rqa_provider_id)    REFERENCES %PREFIX%_req_providers (rqp_id)       ON DELETE SET NULL ON UPDATE RESTRICT,
+    ADD CONSTRAINT %PREFIX%_fk_rqa_user        FOREIGN KEY (rqa_user_id)        REFERENCES %PREFIX%_users (usr_id)               ON DELETE CASCADE  ON UPDATE RESTRICT,
+    ADD CONSTRAINT %PREFIX%_fk_rqa_org         FOREIGN KEY (rqa_org_id)         REFERENCES %PREFIX%_organizations (org_id)       ON DELETE RESTRICT ON UPDATE RESTRICT;

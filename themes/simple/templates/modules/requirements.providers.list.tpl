@@ -25,6 +25,7 @@
     <thead>
         <tr>
             <th>{$l10n->get('SYS_NAME')}</th>
+            <th>{$l10n->get('SYS_REQ_PROVIDER_SHORT_NAME')}</th>
             <th>{$l10n->get('SYS_WEBSITE')}</th>
             <th>{$l10n->get('SYS_REQ_PROVIDER_QUALIFIED')}</th>
             <th>{$l10n->get('SYS_REQ_PROVIDER_PUBLIC')}</th>
@@ -43,7 +44,12 @@
                         </div>
                     {/if}
                 </td>
-
+                <td>
+                    {if $provider.shortName neq ''}
+                        {$provider.shortName}
+                    {/if}
+                </td>
+                
                 <td>
                     {if $provider.url neq ''}
                         <a href="{$provider.url}" target="_blank" rel="noopener">

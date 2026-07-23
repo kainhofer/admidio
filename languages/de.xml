@@ -1813,6 +1813,7 @@
   <string name="SYS_REQ_MODULE_ENABLED_DESC">Aktiviert das Anforderungsmodul für diese Organisation.</string>
   <string name="SYS_REQ_PROVIDERS">Anbieter</string>
   <string name="SYS_REQ_PROVIDER">Anbieter</string>
+  <string name="SYS_REQ_PROVIDER_INFO">Anbieterdaten</string>
   <string name="SYS_REQ_PROVIDER_CREATE">Anbieter erstellen</string>
   <string name="SYS_REQ_PROVIDER_EDIT">Anbieter bearbeiten</string>
   <string name="SYS_REQ_PROVIDER_DELETE_CONFIRM">Soll der Anbieter "%s" wirklich gelöscht werden?</string>
@@ -1827,4 +1828,33 @@
 
   <string name="SYS_REQ_PROVIDER_EDITABLE">Von allen Benutzern bearbeitbar</string>
   <string name="SYS_REQ_PROVIDER_EDITABLE_DESC">Wenn aktiviert, dürfen alle angemeldeten Benutzer diesen Anbieter bearbeiten.</string>
+  <string name="SYS_REQ_ACTIVITIES">Aktivitäten</string>
+  <string name="SYS_REQ_ACTIVITY">Aktivität</string>
+  <string name="SYS_REQ_ACTIVITY_SEARCH">Aktivitäten suchen</string>
+  <string name="SYS_REQ_ATTENDANCE">Teilnahmedauer</string>
+  <string name="SYS_REQ_ATTENDANCE_DESC">Tatsächliche Teilnahmedauer in Stunden. Diese muss nicht mit den für einzelne Anforderungen angerechneten Credits übereinstimmen.</string>
+  <string name="SYS_REQ_BEGIN_DATE">Beginndatum</string>
+  <string name="SYS_REQ_BEGIN_TIME">Beginnzeit</string>
+  <string name="SYS_REQ_END_DATE">Endedatum</string>
+  <string name="SYS_REQ_END_TIME">Endzeit</string>
+  <string name="SYS_REQ_REVIEW">Überprüfung</string>
+  <string name="SYS_REQ_REVIEW_COMMENTS">Prüfkommentare</string>
+  <string name="SYS_REQ_REVIEW_STATUS">Prüfstatus</string>
+  <string name="SYS_REQ_REVIEW_STATUS_OPEN">Offen</string>
+  <string name="SYS_REQ_REVIEW_STATUS_ACCEPTED">Akzeptiert</string>
+  <string name="SYS_REQ_REVIEW_STATUS_PARTIALLY_ACCEPTED">Teilweise akzeptiert</string>
+  <string name="SYS_REQ_REVIEW_STATUS_NOT_ACCEPTED">Nicht akzeptiert</string>
+  <string name="SYS_REQ_REVIEW_STATUS_CLARIFICATION">Klärung erforderlich</string>
+  <string name="SYS_REQ_STATUS">Status</string>
+  <string name="SYS_REQ_STATUS_SUBMITTED">Eingereicht</string>
+  <string name="SYS_REQ_STATUS_WITHDRAWN">Zurückgezogen</string>
+  <string name="SYS_REQ_PROVIDER_SELECT_DESC">Wenn der Anbieter fehlt, legen Sie ihn zuerst über die Seitenfunktion oben an.</string>
+  <string name="SYS_REQ_PROVIDER_SHORT_NAME">Kurzname</string>
+  <string name="SYS_REQ_PROVIDER_SHORT_NAME_DESC">Kurzer Anzeigename für Aktivitätenlisten und kompakte Ansichten.</string>
+  <string name="SYS_REQ_PROVIDER_SELECT_DESC">Wenn der Anbieter fehlt, legen Sie ihn zuerst über die Seitenfunktion oben an.</string>
+  <string name="SYS_REQ_ACTIVITY_LOCATION_DESC">Ort, Adresse, Informationen zum Online-Meeting oder sonstige ortsbezogene Hinweise.</string>
+  <string name="SYS_REQ_LOCATION">Ort</string>
+  <string name="SYS_REQ_FULL_DAY">Ganztägig</string>
+  <string name="SYS_REQ_FULL_DAY_DESC">Wenn ausgewählt, wird für diese Aktivität keine Beginn- oder Endzeit gespeichert.</string>
+
 </resources>
