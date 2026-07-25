@@ -128,7 +128,7 @@ class RequirementsActivityPresenter extends PagePresenter
             $gL10n->get('SYS_WEBSITE'),
             $activity->getValue('rqa_url', 'database'),
             array(
-                'maxLength' => 500,
+                'maxLength' => 2000,
                 'type' => 'url'
             )
         );
