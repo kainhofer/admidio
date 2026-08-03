@@ -253,7 +253,9 @@ $defaultOrgPreferences = array(
     'sso_oidc_issuer_url' => ADMIDIO_URL . FOLDER_MODULES . '/sso/index.php',
     'sso_oidc_signing_key' => '0',
     'sso_oidc_encryption_key' => '',
-
+    'sso_oidc_auth_code_lifetime' => '600',
+    'sso_oidc_access_token_lifetime' => '3600',
+    'sso_oidc_refresh_token_lifetime' => '2592000',
 
     // Weblinks
     'weblinks_module_enabled' => '1',
