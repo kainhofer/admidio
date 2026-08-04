@@ -79,5 +79,18 @@
     <step id="610">CREATE INDEX %PREFIX%_idx_ort_expires_at ON %PREFIX%_oidc_refresh_tokens (ort_expires_at)</step>
     <step id="620">CREATE INDEX %PREFIX%_idx_oac_expires_at ON %PREFIX%_oidc_auth_codes (oac_expires_at)</step>
     <step id="630">ALTER TABLE %PREFIX%_saml_clients ADD COLUMN smc_request_lifetime integer unsigned NULL</step>
+    <step id="640">CREATE TABLE %PREFIX%_saml_logout_transactions (
+            slt_id                      integer unsigned    AUTO_INCREMENT,
+            slt_token                   varchar(64)         NOT NULL,
+            slt_org_id                  integer unsigned    NOT NULL,
+            slt_data                    text                NOT NULL,
+            slt_expires_at              timestamp           NOT NULL,
+            PRIMARY KEY (slt_id)
+        )
+        ENGINE = InnoDB
+        DEFAULT CHARSET = utf8mb4
+        COLLATE = utf8mb4_unicode_ci</step>
+    <step id="650">CREATE UNIQUE INDEX %PREFIX%_idx_slt_token ON %PREFIX%_saml_logout_transactions (slt_token)</step>
+    <step id="660">CREATE INDEX %PREFIX%_idx_slt_expires_at ON %PREFIX%_saml_logout_transactions (slt_expires_at)</step>
     <step>stop</step>
 </update>
