@@ -130,5 +130,9 @@
         COLLATE = utf8mb4_unicode_ci</step>
     <step id="740">CREATE UNIQUE INDEX %PREFIX%_idx_osp_session_client ON %PREFIX%_oidc_session_participants (osp_external_session_id, osp_client_id)</step>
     <step id="750">CREATE INDEX %PREFIX%_idx_osp_expires_at ON %PREFIX%_oidc_session_participants (osp_expires_at)</step>
+    <step id="760">ALTER TABLE %PREFIX%_oidc_clients ADD COLUMN ocl_frontchannel_logout_uri varchar(2000) NULL</step>
+    <step id="770">ALTER TABLE %PREFIX%_oidc_clients ADD COLUMN ocl_frontchannel_logout_session_required boolean NOT NULL DEFAULT false</step>
+    <step id="780">ALTER TABLE %PREFIX%_oidc_clients ADD COLUMN ocl_backchannel_logout_uri varchar(2000) NULL</step>
+    <step id="790">ALTER TABLE %PREFIX%_oidc_clients ADD COLUMN ocl_backchannel_logout_session_required boolean NOT NULL DEFAULT false</step>
     <step>stop</step>
 </update>
