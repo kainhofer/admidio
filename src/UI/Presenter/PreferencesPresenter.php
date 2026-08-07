@@ -2270,20 +2270,14 @@ class PreferencesPresenter extends PagePresenter
             null,
             array('class' => 'form-preferences')
         );
-
-
-        // Link to Key administration
-        $url = SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_MODULES . '/sso/keys.php');
-        $html = '<a class="btn btn-secondary admidio-messagebox" href="javascript:void(0);" data-buttons="yes-no"
-            data-message="' . $gL10n->get('ORG_NOT_SAVED_SETTINGS_LOST') . '</br>' .
-            $gL10n->get('ORG_NOT_SAVED_SETTINGS_CONTINUE') . '"
-            data-href="window.location.href=\'' . $url . '\'">
-            <i class="bi bi-key"></i>' . $gL10n->get('SYS_SSO_KEY_ADMIN') . '</a>';
-        $formSSO->addCustomContent(
-            'sso_keys',
-            $gL10n->get('SYS_SSO_KEYS'),
-            $html,
-            array()
+        // Template button that links to the key administration, will be cloned an inserted by JS
+        $formSSO->addButton(
+            'sso_key_admin_button_template',
+            '',
+            array(
+                'icon' => 'bi-key',
+                'class' => 'btn-secondary sso-key-admin-button'
+            )
         );
 
         $samlService = new \Admidio\SSO\Service\SAMLService($gDb, $gCurrentUser);
@@ -2317,13 +2311,15 @@ class PreferencesPresenter extends PagePresenter
             // We can add the certificates as additional value attributes to the select entries
             $samlSigningValueAttributes[$key['key_id']] = ['data-global' => $key['key_certificate']];
         }
-
+        $samlSigningKeys[KeyService::CREATE_DEFAULT_KEY_VALUE] = $gL10n->get('SYS_SSO_KEY_CREATE_DEFAULT');
+        
         $samlEncryptionKeys = array();
         $samlEncryptionValueAttributes = array();
         foreach ($keyService->getKeysData(true, KeyService::USAGE_SAML_ENCRYPTION) as $key) {
             $samlEncryptionKeys[$key['key_id']] = $key['key_name'] . ' (' . $key['key_algorithm'] . ', ' . $key['key_expires_at'] . ')';
             $samlEncryptionValueAttributes[$key['key_id']] = array('data-global' => $key['key_certificate']);
         }
+        $samlEncryptionKeys[KeyService::CREATE_DEFAULT_KEY_VALUE] = $gL10n->get('SYS_SSO_KEY_CREATE_DEFAULT');
 
         // Add current signing and/or encryption keys, even if they are invalid, but indicate them as invalid!
         $currentSamlSigningKeyId = (int) $formValues['sso_saml_signing_key'];
@@ -2340,14 +2336,15 @@ class PreferencesPresenter extends PagePresenter
             $gL10n->get('SYS_SSO_SIGNING_KEY'),
             $samlSigningKeys,
             array('defaultValue' => $formValues['sso_saml_signing_key'], 'firstEntry' => $gL10n->get('SYS_NONE'),
-                'valueAttributes' => $samlSigningValueAttributes, 'class' => 'if-saml-enabled')
+                'valueAttributes' => $samlSigningValueAttributes, 'class' => 'if-saml-enabled sso-key-select')
         );
+
         $formSSO->addSelectBox(
             'sso_saml_encryption_key',
             $gL10n->get('SYS_SSO_ENCRYPTION_KEY'),
             $samlEncryptionKeys,
             array('defaultValue' => $formValues['sso_saml_encryption_key'], 'firstEntry' => $gL10n->get('SYS_NONE'),
-                'valueAttributes' => $samlEncryptionValueAttributes, 'class' => 'if-saml-enabled')
+                'valueAttributes' => $samlEncryptionValueAttributes, 'class' => 'if-saml-enabled sso-key-select')
         );
 
         $formSSO->addCheckbox(
@@ -2421,6 +2418,7 @@ class PreferencesPresenter extends PagePresenter
             // We can add the certificates as additional value attributes to the select entries
             $valueAttributes[$key['key_id']] = ['data-global' => $key['key_certificate']];
         }
+        $keys[KeyService::CREATE_DEFAULT_KEY_VALUE] = $gL10n->get('SYS_SSO_KEY_CREATE_DEFAULT');
 
         // Add current signing and/or encryption keys, even if they are invalid, but indicate them as invalid!
         $currentOidcKeyId = (int) $formValues['sso_oidc_signing_key'];
@@ -2433,7 +2431,7 @@ class PreferencesPresenter extends PagePresenter
             $gL10n->get('SYS_SSO_SIGNING_KEY'),
             $keys,
             array('defaultValue' => $formValues['sso_oidc_signing_key'], 'firstEntry' => $gL10n->get('SYS_NONE'),
-                'valueAttributes' => $valueAttributes, 'class' => 'if-oidc-enabled')
+                'valueAttributes' => $valueAttributes, 'class' => 'if-oidc-enabled sso-key-select')
         );
 
         $formSSO->addInput(
@@ -2507,6 +2505,7 @@ class PreferencesPresenter extends PagePresenter
         );
 
         $smarty = $this->getSmartyTemplate();
+        $smarty->assign('ssoKeyAdminUrl', SecurityUtils::encodeUrl(ADMIDIO_URL . FOLDER_MODULES . '/sso/keys.php'));
         $formSSO->addToSmarty($smarty);
         $gCurrentSession->addFormObject($formSSO);
         return $smarty->fetch('preferences/preferences.sso.tpl');
