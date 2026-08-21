@@ -2353,6 +2353,11 @@ final class CoreTasks
      */
     private static function installationConfigPath(): string
     {
+        // the CLI bootstrap resolves --config, so install:run writes where the next call reads
+        if (defined('ADMIDIO_CONFIG_FILE')) {
+            return ADMIDIO_CONFIG_FILE;
+        }
+
         return ADMIDIO_PATH . FOLDER_DATA . '/config.php';
     }
 
