@@ -81,6 +81,89 @@ final class UpdateStepsCode
     }
 
     /**
+     * Give every organization its own copy of any SSO key it points at but does not own.
+     *
+     * SSO keys used to be global: a key row carried the key_org_id of whichever organization
+     * created it, and every organization could select it in its own sso_oidc_signing_key,
+     * sso_saml_signing_key or sso_saml_encryption_key preference. Key lookups are now scoped,
+     * so a preference pointing at another organization's key stops resolving and SSO for that
+     * organization fails with what looks like a broken key rather than a scoping change.
+     *
+     * For each such preference this clones the key into the referencing organization, with a
+     * fresh UUID and the same material, and repoints the preference at the copy. Keys an
+     * organization already owns are left alone, and a second run finds the clone it made the
+     * first time instead of making another.
+     *
+     * @throws Exception
+     */
+    public static function updateStep51CloneSsoKeysPerOrganization(): void
+    {
+        $keyPreferences = array('sso_oidc_signing_key', 'sso_saml_signing_key', 'sso_saml_encryption_key');
+
+        $sql = 'SELECT prf_id, prf_org_id, prf_value
+                  FROM ' . TBL_PREFERENCES . '
+                 WHERE prf_name IN (?, ?, ?) -- $keyPreferences
+                   AND prf_value <> \'\'';
+        $preferences = self::$db->queryPrepared($sql, $keyPreferences)->fetchAll();
+
+        foreach ($preferences as $preference) {
+            $keyId = (int) $preference['prf_value'];
+            $orgId = (int) $preference['prf_org_id'];
+
+            if ($keyId <= 0) {
+                continue;
+            }
+
+            $sql = 'SELECT key_org_id, key_name, key_algorithm, key_private, key_public,
+                           key_certificate, key_expires_at, key_is_active, key_usr_id_create
+                      FROM ' . TBL_SSO_KEYS . '
+                     WHERE key_id = ? -- $keyId';
+            $key = self::$db->queryPrepared($sql, array($keyId))->fetch();
+
+            // A preference pointing at a key that no longer exists was already broken before
+            // this update, so there is nothing to migrate.
+            if ($key === false || (int) $key['key_org_id'] === $orgId) {
+                continue;
+            }
+
+            // The public part identifies the key material, so an existing copy in the target
+            // organization is the clone from an earlier run of this step.
+            $sql = 'SELECT key_id
+                      FROM ' . TBL_SSO_KEYS . '
+                     WHERE key_org_id = ? -- $orgId
+                       AND key_public = ? -- $key[\'key_public\']';
+            $existingClone = self::$db->queryPrepared($sql, array($orgId, $key['key_public']))->fetch();
+
+            if ($existingClone !== false) {
+                $newKeyId = (int) $existingClone['key_id'];
+            } else {
+                $sql = 'INSERT INTO ' . TBL_SSO_KEYS . '
+                               (key_uuid, key_org_id, key_name, key_algorithm, key_private, key_public,
+                                key_certificate, key_expires_at, key_is_active, key_usr_id_create)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                self::$db->queryPrepared($sql, array(
+                    Uuid::uuid4()->toString(),
+                    $orgId,
+                    $key['key_name'],
+                    $key['key_algorithm'],
+                    $key['key_private'],
+                    $key['key_public'],
+                    $key['key_certificate'],
+                    $key['key_expires_at'],
+                    $key['key_is_active'],
+                    $key['key_usr_id_create']
+                ));
+                $newKeyId = (int) self::$db->lastInsertId();
+            }
+
+            $sql = 'UPDATE ' . TBL_PREFERENCES . '
+                       SET prf_value = ? -- $newKeyId
+                     WHERE prf_id = ? -- $preference[\'prf_id\']';
+            self::$db->queryPrepared($sql, array($newKeyId, $preference['prf_id']));
+        }
+    }
+
+    /**
      * This method will convert the charset of the database tables to utf8mb4 if not already done.
      * This is necessary to support emojis and other special characters in the future.
      * @throws Exception
