@@ -261,14 +261,45 @@ class ChangelogTest extends DatabaseTestCase
             $before = $this->lastLogId();
             $reread = new User($this->getDatabase(), $GLOBALS['gProfileFields'], (int) $user->getValue('usr_id'));
             $reread->saveChangesWithoutRights();
+            $reread->setValue('usr_last_login', DATETIME_NOW);
+            $reread->setValue('usr_number_login', 3);
+            $reread->save();
+
+            return $this->logEntriesSince($before);
+        });
+
+        // the login counters and the timestamps are noise, not an audit trail
+        $this->assertCount(0, $entries);
+    }
+
+    /**
+     * Test that activating an account is audited
+     *
+     * @testdox Activating an account is logged like any other change
+     */
+    public function testActivatingAnAccountIsLogged(): void
+    {
+        $entries = $this->asAdministrator(function () {
+            $user = new User($this->getDatabase(), $GLOBALS['gProfileFields']);
+            $user->setValue('usr_login_name', 'audited');
+            $user->setValue('LAST_NAME', 'Audited');
+            $user->save();
+
+            $before = $this->lastLogId();
+            $reread = new User($this->getDatabase(), $GLOBALS['gProfileFields'], (int) $user->getValue('usr_id'));
+            $reread->saveChangesWithoutRights();
             $reread->setValue('usr_valid', 0);
             $reread->save();
 
             return $this->logEntriesSince($before);
         });
 
-        // the login counters, the timestamps and the active flag are noise, not an audit trail
-        $this->assertCount(0, $entries);
+        $this->assertCount(1, $entries);
+        $this->assertEquals('MODIFY', $entries[0]['log_action']);
+        $this->assertEquals('usr_valid', $entries[0]['log_field']);
+        $this->assertEquals('1', $entries[0]['log_value_old']);
+        // a false boolean stringifies to '', which the generic Entity::setValue() stores as NULL
+        $this->assertNull($entries[0]['log_value_new']);
     }
 
     /**
