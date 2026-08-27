@@ -47,7 +47,13 @@ const FOLDER_THEMES = '/themes';
 const FOLDER_MODULES = '/modules';
 const FOLDER_PLUGINS = '/plugins';
 const DATE_MAX = '9999-12-31';
-const TABLE_PREFIX = 'adm';
+// composer test:all runs the unit, integration and CLI suites in one process. The Hooks unit tests
+// under tests/Unit/Hooks execute the real Entity against an in-memory SQLite connection and need
+// this constant before this bootstrap ever runs, with the very same value, so it is guarded rather
+// than declared with const, which would fatal on a second definition.
+if (!defined('TABLE_PREFIX')) {
+    define('TABLE_PREFIX', 'adm');
+}
 
 // Define as PHP define() since they depend on runtime values
 define('ADMIDIO_VERSION_TEXT', ADMIDIO_VERSION);
@@ -58,7 +64,9 @@ define('ADMIDIO_PATH', $admidioRoot);
 define('FOLDER_DATA', admidioTestDataFolder($admidioRoot));
 define('FOLDER_TEMP_DATA', FOLDER_DATA . '/temp');
 define('DATE_NOW', date('Y-m-d'));
-define('DATETIME_NOW', date('Y-m-d H:i:s'));
+if (!defined('DATETIME_NOW')) {
+    define('DATETIME_NOW', date('Y-m-d H:i:s'));
+}
 define('SCRIPT_START_TIME', microtime(true));
 define('DOMAIN', 'admidio.test');
 define('ADMIDIO_URL', 'http://admidio.test');
@@ -157,7 +165,15 @@ $engineMap = [
     'mysql' => \Admidio\Infrastructure\Database::PDO_ENGINE_MYSQL,
     'postgres' => \Admidio\Infrastructure\Database::PDO_ENGINE_PGSQL,
 ];
-define('DB_TYPE', $engineMap[$dbConfig['engine']] ?? \Admidio\Infrastructure\Database::PDO_ENGINE_MYSQL);
+// The Hooks unit tests always run against an in-memory SQLite connection that emulates MySQL and
+// define this constant before this bootstrap can run. In the ordinary, CI-covered invocations -
+// composer test:unit and composer test:integration are separate processes - this never collides.
+// Only composer test:all with TEST_DATABASE_ENGINE=postgres run locally is affected: DB_TYPE then
+// stays on the MySQL boolean handling for the integration suite too. Run the suites separately to
+// get full PostgreSQL fidelity.
+if (!defined('DB_TYPE')) {
+    define('DB_TYPE', $engineMap[$dbConfig['engine']] ?? \Admidio\Infrastructure\Database::PDO_ENGINE_MYSQL);
+}
 
 // system/bootstrap/constants.php defines this from the configuration file; Database::tableExists()
 // looks the schema up by it
