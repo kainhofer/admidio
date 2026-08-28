@@ -1,15 +1,18 @@
 <?php
 
-namespace Birthday\classes;
+namespace AdmidioPlugin\Birthday;
 
-use Admidio\Infrastructure\Plugins\Overview;
-use Admidio\Infrastructure\Plugins\PluginAbstract;
+use Admidio\Hooks\Hooks;
+use Admidio\Infrastructure\Plugins\Plugin;
+use Admidio\Infrastructure\Plugins\PluginPanel;
+use Admidio\Infrastructure\Plugins\PluginRegistry;
+use Admidio\Infrastructure\Plugins\PluginWidget;
 use Admidio\Infrastructure\Utils\SecurityUtils;
 use Admidio\Roles\Service\RolesService;
+use Admidio\UI\Presenter\PagePresenter;
+use AdmidioPlugin\Birthday\Presenter\BirthdayPreferencesPresenter;
 
-use InvalidArgumentException;
 use Exception;
-use Throwable;
 use DateTime;
 
 /**
@@ -23,43 +26,79 @@ use DateTime;
  * @license https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License v2.0 only
  ***********************************************************************************************
  */
-class Birthday extends PluginAbstract
+final class Birthday
 {
-    private static bool $birthdayShowNames = false;
-    /** 
-     * Get the plugin configuration
-     * @return array Returns the plugin configuration
-     */
-    public static function getPluginConfig() : array
-    {
-        // get the plugin config from the parent class
-        $config = parent::getPluginConfig();
-
-        // if the key equals 'birthday_roles_view_plugin' and the value is still the default value, retrieve the categories from the database
-        if (array_key_exists('birthday_roles_view_plugin', $config) && $config['birthday_roles_view_plugin']['value'] === self::$defaultConfig['birthday_roles_view_plugin']['value']) {
-            $config['birthday_roles_view_plugin']['value'] = self::getAvailableRoles(1, true);
-        } 
-        if (array_key_exists('birthday_roles_sql', $config) && $config['birthday_roles_sql']['value'] === self::$defaultConfig['birthday_roles_sql']['value']) {
-            $config['birthday_roles_sql']['value'] = self::getAvailableRoles(1, true);
-        }
-        return $config;
-    }
-    
     /**
-     * Get the plugin configuration values
-     * @return array Returns the plugin configuration values
+     * The directory of this plugin, which is its only identity.
      */
-    public static function getPluginConfigValues() : array
-    {
-        // get the plugin config values from the parent class
-        $config = parent::getPluginConfigValues();
+    public const PLUGIN_ID = 'birthday';
 
-        // if the key equals 'birthday_roles_view_plugin' and the value is still the default value, retrieve the categories from the database
-        if (array_key_exists('birthday_roles_view_plugin', $config) && $config['birthday_roles_view_plugin'] === self::$defaultConfig['birthday_roles_view_plugin']['value']) {
-            $config['birthday_roles_view_plugin'] = self::getAvailableRoles(1, true);
-        } 
-        if (array_key_exists('birthday_roles_sql', $config) && $config['birthday_roles_sql'] === self::$defaultConfig['birthday_roles_sql']['value']) {
-            $config['birthday_roles_sql'] = self::getAvailableRoles(1, true);
+    /**
+     * Where the widget is placed on the overview page as long as nobody moved it.
+     */
+    public const DEFAULT_SEQUENCE = 2;
+
+    /**
+     * The value a role list has as long as nobody narrowed it down: every active role.
+     */
+    private const ALL_ROLES = array('All');
+
+    private static bool $birthdayShowNames = false;
+
+    /**
+     * Announce the widget and the preferences panel. This is what plugin.php calls.
+     * @return void
+     */
+    public static function register(): void
+    {
+        $plugin = PluginRegistry::get(self::PLUGIN_ID);
+        if ($plugin === null) {
+            return;
+        }
+
+        PluginWidget::register($plugin, array(self::class, 'renderWidget'), array(
+            'sequence' => self::DEFAULT_SEQUENCE
+        ));
+
+        Hooks::addFilter(
+            PluginPanel::HOOK,
+            static function (array $panels) use ($plugin): array {
+                global $gL10n;
+
+                $panels[] = array(
+                    'id' => PluginPanel::normalizeId($plugin->id),
+                    'title' => $gL10n->get($plugin->name),
+                    'icon' => $plugin->icon,
+                    'group' => PluginPanel::GROUP_OVERVIEW,
+                    'sequence' => self::DEFAULT_SEQUENCE,
+                    'create' => array(BirthdayPreferencesPresenter::class, 'createForm')
+                );
+
+                return $panels;
+            },
+            PluginPanel::DEFAULT_SEQUENCE,
+            1,
+            $plugin->id
+        );
+    }
+
+    /**
+     * The settings of the plugin, with the two role lists resolved.
+     *
+     * A role list that nobody narrowed down holds the sentinel "All", which means every active role
+     * and is turned into the actual role IDs here.
+     * @param Plugin $plugin
+     * @return array<string,mixed>
+     * @throws Exception
+     */
+    public static function getConfig(Plugin $plugin): array
+    {
+        $config = $plugin->getSettingValues();
+
+        foreach (array('birthday_roles_view_plugin', 'birthday_roles_sql') as $key) {
+            if (($config[$key] ?? null) === self::ALL_ROLES) {
+                $config[$key] = self::getAvailableRoles(1, true);
+            }
         }
 
         return $config;
@@ -93,11 +132,14 @@ class Birthday extends PluginAbstract
         return $allRolesSet;
     }
 
-    private static function getBirthdaysData() : array
+    /**
+     * @param array<string,mixed> $config
+     * @return array<int,array<string,string>>
+     * @throws Exception
+     */
+    private static function getBirthdaysData(array $config) : array
     {
         global $gSettingsManager, $gCurrentUser, $gDb, $gL10n, $gProfileFields, $gValidLogin, $gDbType, $gCurrentOrgId;
-
-        $config = self::getPluginConfigValues();
 
         // check if only members of configured roles could view birthday
         if ($gValidLogin) {
@@ -366,65 +408,41 @@ class Birthday extends PluginAbstract
     }
 
     /**
+     * Build the widget of the overview page. Whether it is shown at all was decided before this is
+     * called, by the preference **birthday_plugin_enabled**.
      * @param PagePresenter $page
-     * @throws InvalidArgumentException
-     * @throws Exception
-     * @return bool
+     * @param Plugin $plugin
+     * @return string
+     * @throws Exception|\Smarty\Exception
      */
-    public static function doRender($page = null) : bool
+    public static function renderWidget(PagePresenter $page, Plugin $plugin): string
     {
-        global $gSettingsManager, $gL10n, $gValidLogin;
+        global $gSettingsManager, $gL10n;
 
-        // show the announcement list
-        try {
-            $rootPath = dirname(__DIR__, 3);
-            $pluginFolder = basename(self::$pluginPath);
+        $variables = array('name' => $plugin->id, 'message' => '', 'birthdays' => array());
 
-            require_once($rootPath . '/system/common.php');
+        if ($gSettingsManager->getInt('events_module_enabled') === 0) {
+            $variables['message'] = $gL10n->get('SYS_MODULE_DISABLED');
 
-            $birthdayPlugin = new Overview($pluginFolder);
-
-            // check if the plugin is installed
-            if (!self::isInstalled()) {
-                throw new InvalidArgumentException($gL10n->get('SYS_PLUGIN_NOT_INSTALLED'));
-            }
-
-            if ($gSettingsManager->getInt('events_module_enabled') > 0) {
-                if ($gSettingsManager->getInt('birthday_plugin_enabled') === 1 || ($gSettingsManager->getInt('birthday_plugin_enabled') === 2 && $gValidLogin)) {
-                    $birthdaysArray = self::getBirthdaysData();
-
-                    if (!empty($birthdaysArray)) {
-                        if (self::$birthdayShowNames) {
-                            $birthdayPlugin->assignTemplateVariable('birthdays', $birthdaysArray);
-                        } else {
-                            if (count($birthdaysArray) === 1) {
-                                $birthdayPlugin->assignTemplateVariable('message',$gL10n->get('PLG_BIRTHDAY_ONE_MEMBER'));
-                            } else {
-                                $birthdayPlugin->assignTemplateVariable('message',$gL10n->get('PLG_BIRTHDAY_MORE_MEMBERS', array(count($birthdaysArray))));
-                            }
-                        }
-                    } else {                   
-                        // If the configuration is set accordingly, a message is output if no member has a birthday today
-                        if ($gSettingsManager->getBool('birthday_show_notice_none')) {
-                            $birthdayPlugin->assignTemplateVariable('message',$gL10n->get('PLG_BIRTHDAY_NO_MEMBERS'));
-                        }
-                    }
-                } else {
-                    $birthdayPlugin->assignTemplateVariable('message',$gL10n->get('PLG_BIRTHDAY_NO_ENTRIES_VISITORS'));
-                }
-            } else {
-                $birthdayPlugin->assignTemplateVariable('message', $gL10n->get('SYS_MODULE_DISABLED'));
-            }
-
-            if (isset($page)) {
-                echo $birthdayPlugin->html('plugin.birthday.tpl');
-            } else {
-                $birthdayPlugin->showHtmlPage('plugin.birthday.tpl');
-            }
-        } catch (Throwable $e) {
-            echo $e->getMessage();
+            return $plugin->renderTemplate($page, 'plugin.birthday.tpl', $variables);
         }
 
-        return true;
+        $config = self::getConfig($plugin);
+        $birthdaysArray = self::getBirthdaysData($config);
+
+        if (!empty($birthdaysArray)) {
+            if (self::$birthdayShowNames) {
+                $variables['birthdays'] = $birthdaysArray;
+            } elseif (count($birthdaysArray) === 1) {
+                $variables['message'] = $gL10n->get('PLG_BIRTHDAY_ONE_MEMBER');
+            } else {
+                $variables['message'] = $gL10n->get('PLG_BIRTHDAY_MORE_MEMBERS', array(count($birthdaysArray)));
+            }
+        } elseif ($config['birthday_show_notice_none']) {
+            // If the configuration is set accordingly, a message is output if no member has a birthday today
+            $variables['message'] = $gL10n->get('PLG_BIRTHDAY_NO_MEMBERS');
+        }
+
+        return $plugin->renderTemplate($page, 'plugin.birthday.tpl', $variables);
     }
 }
