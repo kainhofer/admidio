@@ -150,7 +150,7 @@ final class Birthday
                 }
             }
         } else {
-            if ($config['birthday_show_names_extern'] === 1) {
+            if ($config['birthday_show_names_extern']) {
                 // every visitor is allowed to view birthdays
                 self::$birthdayShowNames = true;
             }
@@ -390,7 +390,7 @@ final class Birthday
                     }
 
                     // don't show age of birthday person if preference is set
-                    if ($config['birthday_show_age'] === 0 || !$gValidLogin) {
+                    if (!$config['birthday_show_age'] || !$gValidLogin) {
                         $birthdayText .= '_NO_AGE';
                     }
 
