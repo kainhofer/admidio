@@ -42,26 +42,34 @@ const HTTPS = false;
 const FOLDER_SYSTEM = '/system';
 const FOLDER_INSTALLATION = '/install';
 const FOLDER_LIBS = '/libs';
-const FOLDER_LANGUAGES = '/languages';
 const FOLDER_THEMES = '/themes';
 const FOLDER_MODULES = '/modules';
-const FOLDER_PLUGINS = '/plugins';
 const DATE_MAX = '9999-12-31';
 // composer test:all runs the unit, integration and CLI suites in one process. The Hooks unit tests
-// under tests/Unit/Hooks execute the real Entity against an in-memory SQLite connection and need
-// this constant before this bootstrap ever runs, with the very same value, so it is guarded rather
-// than declared with const, which would fatal on a second definition.
+// under tests/Unit/Hooks execute the real Entity against an in-memory SQLite connection and define
+// some of the same bootstrap constants before this file is loaded, with the very same values. Those
+// are guarded with define() rather than declared with const, which would warn on redefinition.
 if (!defined('TABLE_PREFIX')) {
     define('TABLE_PREFIX', 'adm');
+}
+if (!defined('FOLDER_LANGUAGES')) {
+    define('FOLDER_LANGUAGES', '/languages');
+}
+if (!defined('FOLDER_PLUGINS')) {
+    define('FOLDER_PLUGINS', '/plugins');
 }
 
 // Define as PHP define() since they depend on runtime values
 define('ADMIDIO_VERSION_TEXT', ADMIDIO_VERSION);
-define('ADMIDIO_PATH', $admidioRoot);
+if (!defined('ADMIDIO_PATH')) {
+    define('ADMIDIO_PATH', $admidioRoot);
+}
 
 // Installation::install() creates ecard_templates, logs, mail_templates and temp below this
 // folder, so it has to be the directory of the test run and not the adm_my_files of the checkout
-define('FOLDER_DATA', admidioTestDataFolder($admidioRoot));
+if (!defined('FOLDER_DATA')) {
+    define('FOLDER_DATA', admidioTestDataFolder($admidioRoot));
+}
 define('FOLDER_TEMP_DATA', FOLDER_DATA . '/temp');
 define('DATE_NOW', date('Y-m-d'));
 if (!defined('DATETIME_NOW')) {
@@ -77,7 +85,6 @@ define('HOST', 'admidio.test');
 // Database table constants that entities require
 const TBL_ANNOUNCEMENTS = TABLE_PREFIX . '_announcements';
 const TBL_AUTO_LOGIN = TABLE_PREFIX . '_auto_login';
-const TBL_CATEGORIES = TABLE_PREFIX . '_categories';
 const TBL_CATEGORY_REPORT = TABLE_PREFIX . '_category_report';
 const TBL_COMPONENTS = TABLE_PREFIX . '_components';
 const TBL_EVENTS = TABLE_PREFIX . '_events';
@@ -92,7 +99,6 @@ const TBL_LINKS = TABLE_PREFIX . '_links';
 const TBL_LIST_COLUMNS = TABLE_PREFIX . '_list_columns';
 const TBL_LISTS = TABLE_PREFIX . '_lists';
 const TBL_LOG_CHANGES = TABLE_PREFIX . '_log_changes';
-const TBL_MEMBERS = TABLE_PREFIX . '_members';
 const TBL_MENU = TABLE_PREFIX . '_menu';
 const TBL_MESSAGES = TABLE_PREFIX . '_messages';
 const TBL_MESSAGES_ATTACHMENTS = TABLE_PREFIX . '_messages_attachments';
@@ -106,15 +112,11 @@ const TBL_ORGANIZATIONS = TABLE_PREFIX . '_organizations';
 const TBL_PHOTOS = TABLE_PREFIX . '_photos';
 const TBL_PREFERENCES = TABLE_PREFIX . '_preferences';
 const TBL_REGISTRATIONS = TABLE_PREFIX . '_registrations';
-const TBL_ROLE_DEPENDENCIES = TABLE_PREFIX . '_role_dependencies';
-const TBL_ROLES = TABLE_PREFIX . '_roles';
 const TBL_ROLES_RIGHTS = TABLE_PREFIX . '_roles_rights';
 const TBL_ROLES_RIGHTS_DATA = TABLE_PREFIX . '_roles_rights_data';
 const TBL_ROOMS = TABLE_PREFIX . '_rooms';
 const TBL_SAML_CLIENTS = TABLE_PREFIX . '_saml_clients';
 const TBL_SSO_KEYS = TABLE_PREFIX . '_sso_keys';
-const TBL_USERS = TABLE_PREFIX . '_users';
-const TBL_USER_DATA = TABLE_PREFIX . '_user_data';
 const TBL_USER_LOG = TABLE_PREFIX . '_user_log';
 const TBL_USER_FIELDS = TABLE_PREFIX . '_user_fields';
 const TBL_USER_FIELD_OPTIONS = TABLE_PREFIX . '_user_field_select_options';
@@ -127,6 +129,27 @@ const TBL_INVENTORY_FIELDS = TABLE_PREFIX . '_inventory_fields';
 const TBL_INVENTORY_FIELD_OPTIONS = TABLE_PREFIX . '_inventory_field_select_options';
 const TBL_INVENTORY_ITEMS = TABLE_PREFIX . '_inventory_items';
 const TBL_INVENTORY_ITEM_BORROW_DATA = TABLE_PREFIX . '_inventory_item_borrow_data';
+
+// The Hooks unit tests (tests/Unit/Hooks) declare these same table constants when they run first in
+// composer test:all, so they are guarded rather than declared with const.
+if (!defined('TBL_CATEGORIES')) {
+    define('TBL_CATEGORIES', TABLE_PREFIX . '_categories');
+}
+if (!defined('TBL_MEMBERS')) {
+    define('TBL_MEMBERS', TABLE_PREFIX . '_members');
+}
+if (!defined('TBL_ROLE_DEPENDENCIES')) {
+    define('TBL_ROLE_DEPENDENCIES', TABLE_PREFIX . '_role_dependencies');
+}
+if (!defined('TBL_ROLES')) {
+    define('TBL_ROLES', TABLE_PREFIX . '_roles');
+}
+if (!defined('TBL_USERS')) {
+    define('TBL_USERS', TABLE_PREFIX . '_users');
+}
+if (!defined('TBL_USER_DATA')) {
+    define('TBL_USER_DATA', TABLE_PREFIX . '_user_data');
+}
 
 // Password settings
 const PASSWORD_MIN_LENGTH = 8;
