@@ -29,58 +29,9 @@ admidioTestLoadEnvironment($admidioRoot . '/.env.test');
 // Load Admidio's autoloader
 require_once $admidioRoot . '/vendor/autoload.php';
 
-// Define constants needed by Admidio infrastructure
-// These are normally defined in system/bootstrap/constants.php
-const MIN_PHP_VERSION = '8.2.0';
-const ADMIDIO_VERSION_MAIN = 5;
-const ADMIDIO_VERSION_MINOR = 1;
-const ADMIDIO_VERSION_PATCH = 0;
-const ADMIDIO_VERSION_BETA = 0;
-const ADMIDIO_VERSION = ADMIDIO_VERSION_MAIN . '.' . ADMIDIO_VERSION_MINOR . '.' . ADMIDIO_VERSION_PATCH;
-const ADMIDIO_HOMEPAGE = 'https://www.admidio.org/';
-const HTTPS = false;
-const FOLDER_SYSTEM = '/system';
-const FOLDER_INSTALLATION = '/install';
-const FOLDER_LIBS = '/libs';
-const FOLDER_THEMES = '/themes';
-const FOLDER_MODULES = '/modules';
-const DATE_MAX = '9999-12-31';
-// composer test:all runs the unit, integration and CLI suites in one process. The Hooks unit tests
-// under tests/Unit/Hooks execute the real Entity against an in-memory SQLite connection and define
-// some of the same bootstrap constants before this file is loaded, with the very same values. Those
-// are guarded with define() rather than declared with const, which would warn on redefinition.
-if (!defined('TABLE_PREFIX')) {
-    define('TABLE_PREFIX', 'adm');
-}
-if (!defined('FOLDER_LANGUAGES')) {
-    define('FOLDER_LANGUAGES', '/languages');
-}
-if (!defined('FOLDER_PLUGINS')) {
-    define('FOLDER_PLUGINS', '/plugins');
-}
-
-// Define as PHP define() since they depend on runtime values
-define('ADMIDIO_VERSION_TEXT', ADMIDIO_VERSION);
-if (!defined('ADMIDIO_PATH')) {
-    define('ADMIDIO_PATH', $admidioRoot);
-}
-
-// Installation::install() creates ecard_templates, logs, mail_templates and temp below this
-// folder, so it has to be the directory of the test run and not the adm_my_files of the checkout
-if (!defined('FOLDER_DATA')) {
-    define('FOLDER_DATA', admidioTestDataFolder($admidioRoot));
-}
-define('FOLDER_TEMP_DATA', FOLDER_DATA . '/temp');
-define('DATE_NOW', date('Y-m-d'));
-if (!defined('DATETIME_NOW')) {
-    define('DATETIME_NOW', date('Y-m-d H:i:s'));
-}
-define('SCRIPT_START_TIME', microtime(true));
-define('DOMAIN', 'admidio.test');
-define('ADMIDIO_URL', 'http://admidio.test');
-define('ADMIDIO_URL_PATH', '');
-define('SCHEME', 'http');
-define('HOST', 'admidio.test');
+// The bootstrap constants live in tests/constants.php, because the unit test cases need the same
+// values and whichever runs first in a combined run decides them for the whole process.
+require_once __DIR__ . '/constants.php';
 
 // Database table constants that entities require
 const TBL_ANNOUNCEMENTS = TABLE_PREFIX . '_announcements';
