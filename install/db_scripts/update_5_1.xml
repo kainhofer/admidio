@@ -199,5 +199,8 @@
     <step id="1170">ALTER TABLE %PREFIX%_oidc_consents ADD COLUMN oco_policy_hash varchar(64) NULL</step>
     <step id="1180">UPDATE %PREFIX%_components SET com_name_intern = LOWER(com_name_intern) WHERE com_type = 'PLUGIN'</step>
     <step id="1190">UpdateStepsCode::updateStep51ConvertBuiltInPlugins</step>
+    <step id="1200">ALTER TABLE %PREFIX%_components ADD COLUMN com_uuid varchar(36)</step>
+    <step id="1210">UpdateStepsCode::updateStep51AddComponentUuid</step>
+    <step id="1220">CREATE UNIQUE INDEX %PREFIX%_idx_com_uuid ON %PREFIX%_components (com_uuid)</step>
     <step>stop</step>
 </update>
