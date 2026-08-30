@@ -101,7 +101,7 @@ class ChangelogService {
      * @var array
      */
     public static array $noLogTables = [
-        'auto_login', 'components', 'id', 'log_changes',
+        'auto_login', 'id', 'log_changes',
         'messages', 'messages_attachments', 'messages_content', 'messages_recipients',
         'oidc_access_tokens', 'oidc_refresh_tokens', 'oidc_auth_codes', 'registrations',
         'sessions'];
@@ -305,6 +305,7 @@ class ChangelogService {
 
             'preferences' => 'SYS_SETTINGS',
             'texts' => 'SYS_SETTINGS',
+            'components' => 'SYS_EXTENSIONS',
             'saml_clients' => 'SYS_SSO_CLIENTS_SAML',
             'oidc_clients' => 'SYS_SSO_CLIENTS_OIDC',
             'sso_keys' => 'SYS_SSO_KEYS',
@@ -438,6 +439,12 @@ class ChangelogService {
                 'enabledBy' => array(),
                 'tables' => array('organizations', 'menu', 'preferences', 'texts', 'categories')
             ),
+            'plugins' => array(
+                'label' => 'SYS_EXTENSIONS',
+                'section' => 'settings',
+                'enabledBy' => array(),
+                'tables' => array('components')
+            ),
             'other' => array(
                 'label' => 'SYS_ALL_OTHERS',
                 'section' => 'other',
@@ -548,6 +555,8 @@ class ChangelogService {
                 return new User($gDb, $gProfileFields);
             case 'announcements':
                 return new Announcement($gDb);
+            case 'components':
+                return new Component($gDb);
             case 'categories':
                 return new Category($gDb);
             case 'category_report' :
