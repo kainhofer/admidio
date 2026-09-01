@@ -120,6 +120,24 @@ class OIDCClient extends SSOClient implements ClientEntityInterface
         return array_values(array_intersect($configuredGrantTypes, self::SUPPORTED_GRANT_TYPES));
     }
 
+    /**
+     * @return string|null Returns the hook ID of this entity.
+     * @see Entity::getHookId()
+     */
+    public function getHookId(): ?string
+    {
+        return 'oidc_client';
+    }
+
+    /**
+     * @return array Returns the columns whose value must not be handed to a hook callback.
+     * @see Entity::getSensitiveHookColumns()
+     */
+    public function getSensitiveHookColumns(): array
+    {
+        return array('ocl_client_secret');
+    }
+
     public function getRedirectUri(): string
     {
         return $this->getValue($this->columnPrefix . '_redirect_uri', 'database')??'';

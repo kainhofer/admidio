@@ -262,7 +262,7 @@ abstract class SSOService {
 
         // create html page object
         $page = new PagePresenter();
-        $page->setHtmlID('admidio-sso-login');
+        $page->setHtmlID('adm_sso_login');
         $page->setTitle($headline);
         $page->setContentFullWidth();
         $page->hideBackLink();
