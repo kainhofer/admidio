@@ -20,6 +20,7 @@
 !/plugins/event-list/
 !/plugins/latest-documents-files/
 !/plugins/who-is-online/
+!/plugins/requirements/
 
 
 # Only allow commit of official themes
