@@ -794,6 +794,28 @@ final class FileSystemUtils
     }
 
     /**
+     * Value of a Content-Disposition header for a file name that may contain non-ASCII characters.
+     *
+     * A plain filename="..." parameter is only defined for ASCII (RFC 6266); browsers read raw UTF-8
+     * bytes as ISO-8859-1 and save "angezÃ¼ndet" instead of "angezündet". The real name is therefore
+     * sent percent-encoded as filename* (RFC 5987), and filename carries an ASCII fallback for clients
+     * that ignore filename*: German umlauts and ß are transliterated (ä => ae), any other character
+     * outside printable ASCII, as well as quotes, backslashes and percent signs, becomes an underscore.
+     * @param string $disposition Either **attachment** or **inline**.
+     * @param string $filename The file name as UTF-8, without HTML encoding.
+     * @return string Returns the header value, without the header name.
+     */
+    public static function getContentDisposition(string $disposition, string $filename): string
+    {
+        $transliterated = strtr($filename, array('ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue', 'Ä' => 'Ae', 'Ö' => 'Oe', 'Ü' => 'Ue', 'ß' => 'ss'));
+        $pattern = '/[^\x20-\x7E]|["\\\\%]/';
+        // one underscore per character; a name that is not valid UTF-8 is replaced byte by byte
+        $asciiFilename = preg_replace($pattern . 'u', '_', $transliterated) ?? preg_replace($pattern, '_', $transliterated);
+
+        return $disposition . '; filename="' . $asciiFilename . '"; filename*=UTF-8\'\'' . rawurlencode($filename);
+    }
+
+    /**
      * Get a from special-characters clean path-entry
      * @param string $pathname The path-entry to clean
      * @param string $replacer The character to replace spacial-characters with
